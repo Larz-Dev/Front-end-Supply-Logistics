@@ -1,0 +1,1111 @@
+import React, { useState, useRef, useEffect } from "react";
+import { variables, Notificar, Cargar } from "./funciones";
+import fondo from "./assets/images/flechas.png";
+import Chart from "react-apexcharts";
+
+import html2pdf from "html2pdf.js";
+
+import * as XLSX from "xlsx";
+
+import logo from "./assets/images/logo-supply.png";
+
+const Consult = () => {
+  // Calculate the range of pages to display
+
+  const [id, setId] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [datas, setDatas] = useState([]);
+  const [Datos, setDatos] = useState([]);
+  const [Datos2, setDatos2] = useState([]);
+  const [columnas, setColumnas] = useState([]);
+  const [Posicionrestar, setPosicionrestar] = useState(0);
+  const [Consultanomina, setConsultaNomina] = useState([]);
+  const [mostrarVentana1, setMostrarVentana1] = useState(true);
+
+  const [sliderValue, setSliderValue] = useState(0);
+  const printSectionRef = useRef();
+  const fechas = Consultanomina.map((d) => d.Fecha);
+
+  const parseHoras = (valor) => {
+    const num = parseFloat((valor ?? "").toString().trim());
+    return isNaN(num) ? 0 : num;
+  };
+
+  // Función para obtener una serie, solo si contiene al menos un valor distinto de cero
+  const crearSerie = (nombre, datosRaw) => {
+    const datos = datosRaw.map(parseHoras);
+    const tieneDatos = datos.some((val) => val !== 0);
+    return tieneDatos ? { name: nombre, data: datos } : null;
+  };
+
+  // Generar series para gráfico 1 (horas extra)
+  const chartSeries1 = [
+    crearSerie(
+      "Extra Diurna",
+      Consultanomina.map((d) => d.Hora_extra_diurna)
+    ),
+    crearSerie(
+      "Extra Nocturna",
+      Consultanomina.map((d) => d.Hora_extra_nocturna)
+    ),
+    crearSerie(
+      "Extra Dominical",
+      Consultanomina.map((d) => d.Hora_extra_dominical)
+    ),
+    crearSerie(
+      "Extra Festiva",
+      Consultanomina.map((d) => d.Hora_extra_festiva)
+    ),
+    crearSerie(
+      "Recargo Festivo",
+      Consultanomina.map((d) => d.Recargo_festivo)
+    ),
+    crearSerie(
+      "Recargo Nocturno",
+      Consultanomina.map((d) => d.Recargo_nocturno)
+    ),
+    crearSerie(
+      "Recargo Dominical",
+      Consultanomina.map((d) => d.Recargo_dominical)
+    ),
+    crearSerie(
+      "Diurna Ordinaria",
+      Consultanomina.map((d) => d.Hora_diurna_ordinaria)
+    ),
+    crearSerie(
+      "Descanso Dominical Festivo",
+      Consultanomina.map((d) => d.Descarso_dominical_o_festivo)
+    ),
+  ].filter(Boolean); // Elimina las series que son null
+
+  // Generar series para gráfico 2 (recargos y ordinarias)
+
+  // Opciones para ambos gráficos
+  const chartOptions1 = {
+    chart: { id: "horas-extras-1", type: "bar", height: 350, stacked: true },
+    xaxis: { categories: fechas },
+    title: {
+      text: "Distribución de Horas por Día",
+      align: "center",
+      style: { color: "#333" },
+    },
+
+    legend: {
+      show: true, // <-- fuerza que siempre se muestre
+      position: "bottom",
+      floating: false,
+    },
+    tooltip: { shared: true, intersect: false },
+    dataLabels: {
+      enabled: true,
+      style: { colors: ["#000"] },
+    },
+  };
+
+
+  // Gráfico de horas jornada por día (opcionalmente también puedes ocultar los ceros)
+
+  const handlePrint = () => {
+    var element = document.getElementById("print-section");
+    var opt = {
+      orientation: "landscape",
+      margin: 0.2,
+      format: "A2",
+      filename: datas[1] + ".pdf",
+      jsPDF: {
+        unit: "mm",
+        format: "A2",
+        orientation: "landscape",
+        compress: true,
+      },
+      html2canvas: {
+        scale: 3, // Aumentar la escala mejora la calidad
+        allowTaint: true,
+        useCORS: true,
+        scrollX: 0,
+        scrollY: 0,
+        windowWidth: element.scrollWidth, // Ajusta al tamaño real del contenido
+        windowHeight: element.scrollHeight,
+      },
+    };
+
+    html2pdf().set(opt).from(element).save();
+  };
+
+  const handlePrint2 = () => {
+    var element = document.getElementById("print-section");
+
+    var opt = {
+      margin: 0.2,
+      filename:
+        "Control de horas (nómina) " +
+        Consultanomina[0].Nombre +
+        " " +
+        Consultanomina[1].Apellido +
+        " - " +
+        Consultanomina[1].Cedula +
+        ".pdf",
+      jsPDF: {
+        unit: "mm",
+        format: "A2",
+        orientation: "portrait",
+        compress: true,
+      },
+      html2canvas: {
+        scale: 3,
+        allowTaint: true,
+        useCORS: true,
+        scrollX: 0,
+        scrollY: 0,
+        windowWidth: element.scrollWidth,
+        windowHeight: element.scrollHeight,
+        overflow: "hidden",
+      },
+      pagebreak: { mode: ["avoid-all", "css", "legacy"] }, // Controla los saltos
+    };
+
+    html2pdf().set(opt).from(element).save();
+  };
+
+  const LeerExcel = async (file) => {
+    const data = await readExcel(file); // Ensure that readExcel returns the data
+    const sheetNames = Object.keys(data.Sheets); // Get all sheet names as an array
+    const sheetIndex = 0; // Replace with the desired index
+
+    if (sheetIndex < sheetNames.length) {
+      const sheetName = sheetNames[sheetIndex]; // Get the sheet name at the specified index
+      await TranscribirExcel(data.Sheets[sheetName]); // Access the sheet by its name
+      setIsExcelLoaded(true); // Set the state to true after loading the Excel
+    } else {
+      console.error(`Sheet index ${sheetIndex} does not exist.`);
+    }
+  };
+
+  const TranscribirExcel = async (sheet) => {
+    const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 }); // Convert sheet to JSON array
+
+    if (
+      (jsonData[0][0] == "Fecha",
+      jsonData[0][1] == "Placa",
+      jsonData[0][2] == "Tipo de vehiculo")
+    ) {
+      Notificar(
+        "Correcto, Planilla de We Supply aceptada",
+        "success",
+        "normal"
+      );
+      Cargar(true);
+      let cutJson = jsonData.slice(12, jsonData.length);
+
+      let row2 = [];
+      for (let i = 0; i < cutJson.length; i++) {
+        row2[i] = cutJson[i][5].toUpperCase();
+      }
+
+      setFechaSupplyFin(cutJson[cutJson.length - 1][3]);
+      setFechaSupplyInicio(cutJson[0][3]);
+
+      setHoraSupplyFin(cutJson[cutJson.length - 1][3]);
+      setHoraSupplyInicio(cutJson[0][3]);
+
+      for (let i = 0; i < cutJson.length; i++) {
+        cutJson[i][5] = row2[i];
+      }
+
+      setExcel1(cutJson);
+    }
+
+    if (
+      (jsonData[0][0] == "QR",
+      jsonData[0][1] == "Operación",
+      jsonData[0][2] == "Company")
+    ) {
+      if (FechaSupplyFin != "" && FechaSupplyInicio != "") {
+        Notificar("Correcto, Hoja TMS aceptada", "success", "normal");
+        Cargar(true);
+        let cutJson = []; // Array to store filtered rows
+        let count = 0; // Optional: Count of filtered rows
+
+        const estado = "Estado";
+        const newColumnNames = [estado, ...jsonData[0]];
+        setcolumnNames(newColumnNames);
+
+        for (let i = 0; i < jsonData.length; i++) {
+          if (
+            jsonData[i][30] >= FechaSupplyInicio &&
+            jsonData[i][30] <= FechaSupplyFin
+          ) {
+            // Push the entire row into cutJson
+            cutJson.push(jsonData[i]);
+          }
+        }
+
+        count = 0;
+
+        for (let i = 0; i < cutJson.length; i++) {
+          const placa = cutJson[i][5];
+
+          for (let e = 0; e < dataExcel1.length; e++) {
+            if (
+              placa
+                .toLowerCase()
+                .replace("-", "")
+                .replace(" ", "")
+                .includes(
+                  dataExcel1[e][1]
+                    .toLowerCase()
+                    .replace("-", "")
+                    .replace(" ", "")
+                )
+            ) {
+              cutJson[i][48] = "Sí está";
+            }
+
+            if (cutJson[i][48] == null) {
+              let errores = esPrediccion(placa, dataExcel1[e][1]);
+
+              if (errores == 0) {
+                errores = esPermutacion(placa, dataExcel1[e][1]);
+              }
+
+              if (errores >= 1) {
+                cutJson[i][48] =
+                  "Posible error de placa: " + dataExcel1[e][1] + " > " + placa;
+              }
+            }
+          }
+        }
+
+        for (let i = 0; i < cutJson.length; i++) {
+          if (cutJson[i][48] == null) {
+            cutJson[i][48] = "No está";
+          }
+        }
+
+        Cargar(false);
+        setExcel2(cutJson);
+      } else {
+        Notificar(
+          "Se requiere ingresar el archivo de We Supply",
+          "error",
+          "normal"
+        );
+      }
+    }
+  };
+
+  const TransformStringDate = (StringDate) => {
+    // Define the datetime format
+    const datetimeFormat = "dd/MM/yyyy hh:mm:ss a";
+
+    // Parse the datetime string
+    const dateParts = StringDate.split(" ");
+    const date = dateParts[0].split("/");
+    const time = dateParts[1].split(":");
+    const ampm = dateParts[2];
+
+    // Create a new Date object
+    const year = parseInt(date[2]);
+    const month = parseInt(date[1]) - 1; // Months are 0-based in JavaScript
+    const day = parseInt(date[0]);
+    let hour = parseInt(time[0]);
+    const minute = parseInt(time[1]);
+    const second = parseInt(time[2]);
+
+    // Adjust the hour based on AM/PM
+    if (ampm === "p. m." && hour !== 12) {
+      hour += 12;
+    } else if (ampm === "a. m." && hour === 12) {
+      hour = 0;
+    }
+
+    // Create the Date object
+    const dateObject = new Date(year, month, day, hour, minute, second);
+
+    return dateObject;
+  };
+
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const handleSearchChange = (event) => {
+    setSearchQuery(event.target.value);
+  };
+
+  function ExcelDateToJSDate(date) {
+    let fecha = new Date(Math.round((date - 25569) * 86400 * 1000));
+    let result =
+      fecha.getUTCDate() +
+      "/" +
+      (fecha.getUTCMonth() + 1) +
+      "/" +
+      fecha.getUTCFullYear();
+    return isNaN(fecha.getTime()) ? "" : result;
+  }
+
+  function ExcelDateToJSTime(date) {
+    let hora = new Date(Math.round((date - 25569) * 86400 * 1000));
+    let result =
+      hora.getUTCHours() +
+      ":" +
+      hora.getUTCMinutes() +
+      ":" +
+      hora.getUTCSeconds();
+    return isNaN(hora.getTime()) ? "" : result;
+  }
+
+  // Obtener los datos de la tercera tabla
+
+  const dateColumns = [16, 20, 24, 25, 26, 28, 29, 31, 45];
+
+  // Identify the columns that contain date values
+
+  const handleSubmit = async (e) => {
+    setSliderValue(0);
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+
+    if (id.length < 7) {
+      setError("El documento debe tener al menos 7 dígitos");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await fetch(variables("API") + "/prenom/get", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        //45703
+        const filteredData = data
+          .map((item) =>
+            item === "45716"
+              ? ""
+              : item && item === "45703"
+              ? ""
+              : item && item === "45731"
+              ? ""
+              : item === " 45746"
+              ? ""
+              : item
+          )
+          .filter(
+            (item) =>
+              typeof item !== "string" || !item.includes("CONSECUTIVO -")
+          );
+
+        setDatas(filteredData);
+        OrganizarArreglo(filteredData);
+
+        Notificar(
+          "Su pre-nómina se ha consultado con éxito",
+          "success",
+          "normal"
+        );
+      } else {
+        Notificar(
+          "Error, no se ha encontrado este documento",
+          "error",
+          "normal"
+        );
+      }
+    } catch (error) {
+      console.error("Error al consultar la pre-pre-nómina:", error);
+      Notificar(
+        "Error al consultar la pre-nómina, por favor intente de nuevo o compruebe su conexión a internet",
+        "error",
+        "normal"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit2 = async (e) => {
+    setSliderValue(0);
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    console.log("Cargando");
+    if (id.length < 7) {
+      setError("El documento debe tener al menos 7 dígitos");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await fetch(variables("API") + "/nom/get", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setConsultaNomina(data);
+
+        Notificar("Su nómina se ha consultado con éxito", "success", "normal");
+      } else {
+        Notificar(
+          "Error, no se ha encontrado este documento",
+          "error",
+          "normal"
+        );
+      }
+    } catch (error) {
+      console.error("Error al consultar la pre-pre-nómina:", error);
+      Notificar(
+        "Error al consultar la nómina, por favor intente de nuevo o compruebe su conexión a internet",
+        "error",
+        "normal"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  function OrganizarArreglo(data) {
+    let guardarSiguientes = 0;
+    let newArreglo = [];
+    let columnaActual2 = [];
+    let columnaActual = [];
+    let iAr = 0;
+    let PosicionBono = 0;
+    let Retornar = [];
+    let Cell = "";
+    let posicion = 0;
+
+    data.forEach((element, index) => {
+      Cell = element + "";
+
+      if (Cell.includes("-") && Cell.includes("/")) {
+        guardarSiguientes = 2;
+      }
+
+      if (Cell == "SUELDO BASICO") {
+        guardarSiguientes = 4;
+      }
+      if (Cell == "SUBSIDIO DE TRANSPOR") {
+        guardarSiguientes = 4;
+      }
+
+      if (Cell == "Vr Hora") {
+        guardarSiguientes = 4;
+      }
+
+      if (Cell == "Total por Conceptos ") {
+        guardarSiguientes = 4;
+      }
+      if (Cell == "Total por Recibido por consecutivo") {
+        guardarSiguientes = 4;
+      }
+
+      if (Cell == "RECARGO NOCTURNO") {
+        guardarSiguientes = 4;
+      }
+      if (Cell == "RECARGO DOMINICAL DI") {
+        guardarSiguientes = 4;
+      }
+      if (Cell == "HORA EXTRA NOCTURNA") {
+        guardarSiguientes = 4;
+      }
+      if (Cell == "HORA EXTRA DIURNA DO") {
+        guardarSiguientes = 4;
+      }
+      if (Cell == "HORA EXTRA DIURNA") {
+        guardarSiguientes = 4;
+      }
+      if (Cell == "HORA DOMINICAL DIURN") {
+        guardarSiguientes = 4;
+      }
+      if (Cell == "BONIFICACION NO SALA") {
+        PosicionBono = index;
+        guardarSiguientes = 4;
+      }
+      if (Cell == "LICENCIA REMUNERADA") {
+        guardarSiguientes = 4;
+      }
+      if (Cell == "DTO GR. RECORDAR") {
+        guardarSiguientes = 4;
+      }
+      if (Cell == "SALUD") {
+        guardarSiguientes = 4;
+      }
+      if (Cell == "INCAPACIDAD GENERAL") {
+        guardarSiguientes = 4;
+      }
+      if (Cell == "INC EMPRESA OP") {
+        guardarSiguientes = 4;
+      }
+      if (Cell == "PENSION") {
+        guardarSiguientes = 4;
+      }
+      if (Cell == "LICENCIA NO REM") {
+        guardarSiguientes = 4;
+      }
+      console.log(data[PosicionBono + 2]);
+      if (
+        Cell == "BONIFICACION NO SALA" &&
+        data[PosicionBono + 2].length != 1
+      ) {
+        console.log("CARGA");
+
+        newArreglo.splice(iAr, 2, "");
+      }
+
+      if (guardarSiguientes >= 1) {
+        guardarSiguientes -= 1;
+
+        if (guardarSiguientes == 1) {
+          newArreglo[iAr] = Cell;
+        }
+
+        if (guardarSiguientes == 3) {
+          if (Cell != "DTO GR. RECORDAR" && Cell != "LICENCIA NO REM") {
+            if (Cell == "Total por Conceptos ") {
+              setPosicionrestar(iAr);
+            }
+
+            //Revisar este
+            columnaActual[iAr] = Cell;
+          } else {
+            columnaActual[iAr] = Cell;
+
+            newArreglo[iAr] = "";
+          }
+        }
+        if (guardarSiguientes == 2) {
+          if (posicion == 9) {
+            columnaActual2[iAr] = Number(Cell).toFixed(2);
+          } else {
+            columnaActual2[iAr] = Cell;
+          }
+        }
+      }
+      iAr += 1;
+
+      //Establecer las siguientes condiciones
+
+      posicion += 1;
+    });
+    Retornar.push(newArreglo);
+    const datosLimpios = Retornar.filter((dato) => dato !== null)[0].slice(
+      1,
+      -1
+    );
+    const arregloConNull = datosLimpios.map((valor) =>
+      valor === "" ? null : valor
+    );
+
+    const columnasLimpias = columnaActual.filter((columna) => columna !== null);
+
+    setDatos2(columnaActual2);
+    setDatos(arregloConNull.slice(1, -1));
+    setColumnas(columnasLimpias);
+    console.log(arregloConNull.slice(1, -1));
+  }
+
+  const getColorPorHora = (horaStr) => {
+    if (!horaStr) return ""; // Si no hay valor, no se pinta
+
+    const [hora, minuto] = horaStr.split(":").map(Number);
+    const totalMin = hora * 60 + minuto;
+
+    // Asumimos:
+    // Día: 05:00 - 13:59
+    // Tarde: 14:00 - 21:59
+    // Noche: 22:00 - 04:59
+    if (totalMin >= 300 && totalMin < 840) return "#FFFA81"; // Día
+    if (totalMin >= 840 && totalMin < 1320) return "#FF9C00"; // Tarde
+    return "#5F7CD3"; // Noche
+  };
+
+  return (
+    <div className="">
+      <header className="bg-supply py-3 shadow-sm ">
+        <div className="container d-flex justify-content-between align-items-center">
+          <div className="d-flex align-items-center ">
+            <img
+              src={logo}
+              alt="Logo We Supply "
+              height="70"
+              className="me-2 bg-white rounded p-1"
+            />
+            <span className="fs-4 fw-bold text-white">We Supply</span>
+          </div>
+        </div>
+      </header>
+      <div className="container mt-4">
+        {/* Botón para cambiar entre ventanas */}
+        <div className="text-center mb-3">
+          <div className="text-end">
+            <a className="linkgris fs-6" href="https://github.com/Larz-Dev">
+              Desarrollado por Larz-Dev <i className="fa-brands fa-github"></i>
+            </a>
+          </div>
+
+          <button
+            className={`btn ${
+              mostrarVentana1 ? "btn-primary bg-supply" : "btn-secondary"
+            } mx-2`}
+            onClick={() => setMostrarVentana1(true)}
+          >
+            Consultar pre-nómina
+          </button>
+          <button
+            className={`btn ${
+              !mostrarVentana1 ? "btn-success" : "btn-secondary"
+            } mx-2`}
+            onClick={() => setMostrarVentana1(false)}
+          >
+            Consultar cierre de nómina
+          </button>
+        </div>
+      </div>
+      <div className="m-3">
+        {/* Ventana 1 */}
+        {mostrarVentana1 && (
+          <div className="ventana1 p-3 border rounded bg-light">
+            <h2 className="text-center ">Consultar pre-nómina</h2>
+
+            <div className="row mx-auto">
+              <div className="col-sm-4 p-4">
+                <br />
+                <div className="justificar  bg-success p-3 rounded-4  text-white ">
+                  <h5 className="fw-bold ">Instrucciones:</h5>
+                  Ingrese su número de documento, luego deslice la barra hasta
+                  que se ponga de color verde y presione el botón 'Consultar
+                  pre-nómina'
+                </div>
+              </div>
+              <div className="col-sm-4 ">
+                <br />
+                <div className="  d-flex justify-content-center align-items-center">
+                  <h3 className="form-label fw-bold fs-3 text-center">
+                    Número de documento
+                    <p></p>
+                    <form onSubmit={handleSubmit}>
+                      <input
+                        type="number"
+                        className="form-control"
+                        value={id}
+                        onChange={(e) => setId(e.target.value)}
+                        minLength={6}
+                      />
+                      {error && <div className="text-danger">{error}</div>}
+                      <br />
+                      <input
+                        type="range"
+                        className=" slider-cuadrado "
+                        style={{ backgroundImage: `url(${fondo})` }}
+                        min="0"
+                        max="100"
+                        value={sliderValue}
+                        onChange={(e) => setSliderValue(e.target.value)}
+                      />
+                      <p></p>
+                      <button
+                        type="submit"
+                        className="form-control col p-1 rounded-4 btn-success btn  fw-bold"
+                        disabled={loading || sliderValue !== "100"}
+                      >
+                        {loading ? "Cargando..." : "Consultar pre-nómina"}
+                      </button>
+                    </form>
+                  </h3>
+                </div>
+              </div>
+
+              <div className="col-sm-12 ">
+                <div>
+                  <div className="row p-5">
+                    <div className="border col-sm-4 p-3 fw-bold">
+                      El valor de "Salud" corresponde al descuento aplicado
+                      sobre la nómina del trabajador.
+                    </div>
+                    <div className="border p-3 col-sm-4 p-3 fw-bold">
+                      El valor de "Pensión" corresponde al descuento aplicado
+                      sobre la nómina del trabajador.
+                    </div>
+                    <div className="border p-3 col-sm-4 p-3 fw-bold">
+                      "DTO GR. RECORDAR" es un descuento por servicio funerario
+                      (solo aplicable a quienes han contratado dicho servicio).
+                    </div>
+
+                    <div className="border p-3 col-sm-4 p-3 bg-esta fw-bold">
+                      El valor mostrado en el cuadro de fondo verde es el monto
+                      que se reflejará en la cuenta.
+                    </div>
+                    <div className="border p-3 col-sm-4 p-3 bg-esta bg-revisar fw-bold">
+                      El valor mostrado en el cuadro de fondo amarillo
+                      representa el monto total antes de aplicar los descuentos
+                      por salud, pensión y otras razones.
+                    </div>
+                    <div className="border p-3 col-sm-4 p-3 bg-noesta fw-bold">
+                      El valor mostrado en el cuadro de fondo rojo es el total
+                      de los descuentos realizados sobre la nómina del
+                      trabajador, incluyendo los descuentos por salud, pensión,
+                      servicio funerario, etc.
+                    </div>
+                  </div>
+                  <div className="" id="print-section" ref={printSectionRef}>
+                    <br />
+                    <br />
+                    <br />
+                    {Datos.length > 0 && (
+                      <div>
+                        <h2 className="text-center">{datas[1]}</h2>
+                        <br />
+                        <div className=" d-grid">
+                          <div className="border p-3  fw-bold ">{datas[2]}</div>
+                          <div className="border p-3  fw-bold ">{datas[3]}</div>
+                          <div className="border p-3  fw-bold ">
+                            {datas[4] + datas[5]}
+                          </div>
+
+                          <div className="border p-3  fw-bold ">
+                            {datas[6].slice(0, -1) +
+                              " $" +
+                              new Intl.NumberFormat().format(datas[7])}
+                          </div>
+                        </div>
+                        <br />
+
+                        <br />
+                      </div>
+                    )}
+                    <div
+                      className=""
+                      style={{
+                        maxHeight: "250px",
+                        overflowY: "auto",
+                        overflowX: "auto",
+                      }}
+                    >
+                      {Datos.length > 0 && (
+                        <table className="table border table-bordered  table-responsive table-striped table-hover m-2">
+                          <thead>
+                            <tr>
+                              {columnas.map((columna, index) => (
+                                <td
+                                  className="PMayus  bg-supply text-white fw-bold text-center "
+                                  key={index}
+                                >
+                                  {columna.toLowerCase()}
+                                </td>
+                              ))}
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              {Datos2.map((fila, index) => (
+                                <td
+                                  className={
+                                    Datos2.length - 1 == index
+                                      ? "bg-esta"
+                                      : Datos2.length - 5 == index
+                                      ? "bg-revisar"
+                                      : Datos2.length - 4 == index
+                                      ? "bg-revisar"
+                                      : ""
+                                  }
+                                  key={index}
+                                >
+                                  {fila > 999
+                                    ? `$ ${new Intl.NumberFormat().format(
+                                        fila
+                                      )}`
+                                    : fila}
+                                </td>
+                              ))}
+                            </tr>
+
+                            <tr>
+                              {Datos.map((fila, index) => (
+                                <td
+                                  className={
+                                    Datos.length - 3 == index
+                                      ? "bg-noesta"
+                                      : Datos.length - 2 == index
+                                      ? "bg-noesta"
+                                      : ""
+                                  }
+                                  key={index}
+                                >
+                                  {index == Posicionrestar
+                                    ? `-$ ${new Intl.NumberFormat().format(
+                                        fila
+                                      )}`
+                                    : fila > 999
+                                    ? `$ ${new Intl.NumberFormat().format(
+                                        fila
+                                      )}`
+                                    : fila}
+                                </td>
+                              ))}
+                              <td></td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      )}
+                    </div>
+
+                    <div className="justificar  bg-warning fs-3 m-2 p-3 rounded-4  ">
+                      <h2 className="fw-bold ">Nota:</h2>
+                      Este aplicativo ha sido desarrollado por un aprendiz del
+                      SENA como parte de un proyecto de aprendizaje. Por lo
+                      tanto, no tiene ninguna relación con We Supply. En caso de
+                      presentarse errores, se deberá notificar al aprendiz y no
+                      al personal de la empresa.
+                    </div>
+                  </div>
+                  <br />
+                  {Datos.length > 0 && (
+                    <div className="mx-5">
+                      <button
+                        className="form-control  p-1 rounded-4 btn-danger btn  fw-bold"
+                        onClick={handlePrint}
+                      >
+                        descargar pre-nómina{" "}
+                        <i className="fa-solid fa-file-pdf"></i>
+                      </button>
+                    </div>
+                  )}
+                </div>
+                <br />
+                <br />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Ventana 2 */}
+        {!mostrarVentana1 && (
+          <div className="ventana2 p-3 border rounded bg-light">
+            <div className="text-center">
+              <h2 className="text-center ">Consultar cierre de nómina</h2>
+
+              <div className="row mx-auto">
+                <div className="col-sm-4 p-4">
+                  <br />
+                  <div className="justificar  bg-success p-3 rounded-4  text-white ">
+                    <h5 className="fw-bold ">Instrucciones:</h5>
+                    Ingrese su número de documento, luego deslice la barra hasta
+                    que se ponga de color verde y presione el botón 'Consultar
+                    cierre de nómina'
+                  </div>
+                </div>
+                <div className="col-sm-4 ">
+                  <br />
+                  <div className="  d-flex justify-content-center align-items-center">
+                    <h3 className="form-label fw-bold fs-3 text-center">
+                      Número de documento
+                      <p></p>
+                      <form onSubmit={handleSubmit2}>
+                        <input
+                          type="number"
+                          className="form-control"
+                          value={id}
+                          onChange={(e) => setId(e.target.value)}
+                          minLength={6}
+                        />
+                        {error && <div className="text-danger">{error}</div>}
+                        <br />
+                        <input
+                          type="range"
+                          className=" slider-cuadrado "
+                          style={{ backgroundImage: `url(${fondo})` }}
+                          min="0"
+                          max="100"
+                          value={sliderValue}
+                          onChange={(e) => setSliderValue(e.target.value)}
+                        />
+                        <p></p>
+                        <button
+                          type="submit"
+                          className="form-control col p-1 rounded-4 btn-success btn  fw-bold"
+                          disabled={loading || sliderValue !== "100"}
+                        >
+                          {loading
+                            ? "Cargando..."
+                            : "Consultar cierre de nómina"}
+                        </button>
+                      </form>
+                    </h3>
+                  </div>
+                </div>
+              </div>
+
+              <div className="" id="print-section" ref={printSectionRef}>
+                <br />
+
+                {Consultanomina.length > 0 && (
+                  <div>
+                    <h2 className="text-center">{Consultanomina[1].nombre}</h2>
+                    <br />
+                    <div className=" d-grid">
+                      <div className="border p-3  fw-bold ">
+                        {Consultanomina[0].Nombre +
+                          " " +
+                          Consultanomina[1].Apellido +
+                          " - " +
+                          Consultanomina[1].Cedula}
+                      </div>
+                    </div>
+                    <br />
+
+                    <br />
+                  </div>
+                )}
+
+                <div
+                  className=""
+                  style={{
+                    overflowY: "auto",
+                    overflowX: "auto",
+                  }}
+                >
+                  {Consultanomina.length > 0 && (
+                    <table className="table border table-bordered table-responsive table-striped table-hover m-2">
+                      <thead>
+                        <tr>
+                          <th>Fecha</th>
+                          <th>Día</th>
+
+                          <th>Código</th>
+                          <th>Entrada</th>
+                          <th>Salida</th>
+                          <th>Jornada</th>
+                          <th>Tipo Turno</th>
+                          <th>Hora Diurna Ordinaria</th>
+                          <th>Recargo Nocturno</th>
+                          <th>Hora Extra Diurna</th>
+                          <th>Hora Extra Nocturna</th>
+                          <th>Hora Dominical Ordinaria</th>
+                          <th>Nocturna Festival/Dom</th>
+                          <th>Extra Diurna Festiva</th>
+                          <th>Extra Nocturna Festiva</th>
+                          <th>Descanso Dominical/Festivo</th>
+                          <th>Total Horas Extra</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {Consultanomina.map((item) => (
+                          <tr key={item.idNomina}>
+                            <td>{item.Fecha}</td>
+                            <td>{item.Dom_Fest}</td>
+
+                            <td>{item.Codigo_2}</td>
+                            <td
+                              className=" text-white"
+                              style={{
+                                backgroundColor: getColorPorHora(
+                                  item.Hora_entrada
+                                ),
+                                color: "#000",
+                              }}
+                            >
+                              {item.Hora_entrada}
+                            </td>
+                            <td
+                              className=" text-white"
+                              style={{
+                                backgroundColor: getColorPorHora(
+                                  item.Hora_salida
+                                ),
+                                color: "#000",
+                              }}
+                            >
+                              {item.Hora_salida}
+                            </td>
+                            <td
+                              className=" text-white"
+                              style={{
+                                backgroundColor: getColorPorHora(
+                                  item.Horas_jornada
+                                ),
+                                color: "#fff",
+                              }}
+                            >
+                              {item.Horas_jornada}
+                            </td>
+                            <td>{item.Tipo_turno.trim()}</td>
+                            <td>{item.Hora_diurna_ordinaria.trim()}</td>
+                            <td>{item.Recargo_nocturno}</td>
+                            <td>{item.Hora_extra_diurna.trim()}</td>
+                            <td>{item.Hora_extra_nocturna.trim()}</td>
+                            <td>
+                              {item.Hora_dominical_diurna_ordinaria.trim()}
+                            </td>
+                            <td>
+                              {item.Hora_nocturna_festival_o_dominical.trim()}
+                            </td>
+                            <td>
+                              {item.Hora_extra_diurna_festiva_o_dominical?.trim() ??
+                                "-"}
+                            </td>
+                            <td>
+                              {item.Hora_extra_nocturna_festiva_o_dominical.trim()}
+                            </td>
+                            <td>{item.Descarso_dominical_o_festivo.trim()}</td>
+                            <td>{item.Total_horas_extra.trim()}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+                </div>
+              
+                <br />
+                <br />
+                <Chart
+                  options={chartOptions1}
+                  series={chartSeries1}
+                  type="bar"
+                  height={500}
+                  
+                />
+  <br />
+  <br />
+                <div className="justificar  bg-warning fs-3 m-2 p-3 rounded-4  ">
+                  <h2 className="fw-bold ">Nota:</h2>
+                  Este aplicativo ha sido desarrollado por un aprendiz del SENA
+                  como parte de un proyecto de aprendizaje. Por lo tanto, no
+                  tiene ninguna relación con We Supply. En caso de presentarse
+                  errores, se deberá notificar al aprendiz y no al personal de
+                  la empresa.
+                </div>
+              </div>
+              <br />
+              {Consultanomina.length > 0 && (
+                <div className="mx-5">
+                  <button
+                    className="form-control  p-1 rounded-4 btn-danger btn  fw-bold"
+                    onClick={handlePrint2}
+                  >
+                    descargar pre-nómina{" "}
+                    <i className="fa-solid fa-file-pdf"></i>
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+
+      <p></p>
+      <p></p>
+    </div>
+  );
+};
+
+export default Consult;

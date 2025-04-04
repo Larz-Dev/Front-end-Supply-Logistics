@@ -1,0 +1,15 @@
+html {
+    height: 100%;
+  }
+  body {
+    min-height: 100%;
+  }
+
+  .btn-app{
+border: solid 1px;
+  }
+
+  .btn-app:hover{
+    border: black solid 1px;
+      }
+
