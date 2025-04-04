@@ -50,10 +50,10 @@ export function Cargar(mostrar) {
 export function variables(nombreVariable) {
   let respuesta = "";
   if (nombreVariable == "API") {
-    respuesta = "http://localhost:3000";
+    respuesta = https://back-end-supply-logistics-camiones-2c4m.onrender.com;
     //
     //"http://localhost:3000"
-    //"https://back-end-supply-logistics-camiones.onrender.com"
+    //https://back-end-supply-logistics-camiones-2c4m.onrender.com
     //"https://back-end-supply-logistics-camiones.onrender.com"
     //
   }
