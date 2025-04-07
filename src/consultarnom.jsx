@@ -23,9 +23,12 @@ const Consult = () => {
   const [Consultanomina, setConsultaNomina] = useState([]);
   const [mostrarVentana1, setMostrarVentana1] = useState(true);
 
+  const [FechaInicioQ, setFechaInicioQ] = useState([]);
+  const [FechaFinQ, setFechaFinQ] = useState([]);
+
   const [sliderValue, setSliderValue] = useState(0);
   const printSectionRef = useRef();
-  const fechas = Consultanomina.map((d) => d.Fecha);
+  const fechas = Consultanomina.map((d) =>new Date( d.Fecha).toLocaleDateString());
 
   const parseHoras = (valor) => {
     const num = parseFloat((valor ?? "").toString().trim());
@@ -103,7 +106,6 @@ const Consult = () => {
     },
   };
 
-
   // Gráfico de horas jornada por día (opcionalmente también puedes ocultar los ceros)
 
   const handlePrint = () => {
@@ -145,6 +147,13 @@ const Consult = () => {
         Consultanomina[1].Apellido +
         " - " +
         Consultanomina[1].Cedula +
+        " - " +new Date(
+          Consultanomina[0].Fecha
+        ).toLocaleDateString() +
+          " - " +
+          new Date(
+            Consultanomina[Consultanomina.length - 1].Fecha
+          ).toLocaleDateString() +
         ".pdf",
       jsPDF: {
         unit: "mm",
@@ -168,195 +177,7 @@ const Consult = () => {
     html2pdf().set(opt).from(element).save();
   };
 
-  const LeerExcel = async (file) => {
-    const data = await readExcel(file); // Ensure that readExcel returns the data
-    const sheetNames = Object.keys(data.Sheets); // Get all sheet names as an array
-    const sheetIndex = 0; // Replace with the desired index
-
-    if (sheetIndex < sheetNames.length) {
-      const sheetName = sheetNames[sheetIndex]; // Get the sheet name at the specified index
-      await TranscribirExcel(data.Sheets[sheetName]); // Access the sheet by its name
-      setIsExcelLoaded(true); // Set the state to true after loading the Excel
-    } else {
-      console.error(`Sheet index ${sheetIndex} does not exist.`);
-    }
-  };
-
-  const TranscribirExcel = async (sheet) => {
-    const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 }); // Convert sheet to JSON array
-
-    if (
-      (jsonData[0][0] == "Fecha",
-      jsonData[0][1] == "Placa",
-      jsonData[0][2] == "Tipo de vehiculo")
-    ) {
-      Notificar(
-        "Correcto, Planilla de We Supply aceptada",
-        "success",
-        "normal"
-      );
-      Cargar(true);
-      let cutJson = jsonData.slice(12, jsonData.length);
-
-      let row2 = [];
-      for (let i = 0; i < cutJson.length; i++) {
-        row2[i] = cutJson[i][5].toUpperCase();
-      }
-
-      setFechaSupplyFin(cutJson[cutJson.length - 1][3]);
-      setFechaSupplyInicio(cutJson[0][3]);
-
-      setHoraSupplyFin(cutJson[cutJson.length - 1][3]);
-      setHoraSupplyInicio(cutJson[0][3]);
-
-      for (let i = 0; i < cutJson.length; i++) {
-        cutJson[i][5] = row2[i];
-      }
-
-      setExcel1(cutJson);
-    }
-
-    if (
-      (jsonData[0][0] == "QR",
-      jsonData[0][1] == "Operación",
-      jsonData[0][2] == "Company")
-    ) {
-      if (FechaSupplyFin != "" && FechaSupplyInicio != "") {
-        Notificar("Correcto, Hoja TMS aceptada", "success", "normal");
-        Cargar(true);
-        let cutJson = []; // Array to store filtered rows
-        let count = 0; // Optional: Count of filtered rows
-
-        const estado = "Estado";
-        const newColumnNames = [estado, ...jsonData[0]];
-        setcolumnNames(newColumnNames);
-
-        for (let i = 0; i < jsonData.length; i++) {
-          if (
-            jsonData[i][30] >= FechaSupplyInicio &&
-            jsonData[i][30] <= FechaSupplyFin
-          ) {
-            // Push the entire row into cutJson
-            cutJson.push(jsonData[i]);
-          }
-        }
-
-        count = 0;
-
-        for (let i = 0; i < cutJson.length; i++) {
-          const placa = cutJson[i][5];
-
-          for (let e = 0; e < dataExcel1.length; e++) {
-            if (
-              placa
-                .toLowerCase()
-                .replace("-", "")
-                .replace(" ", "")
-                .includes(
-                  dataExcel1[e][1]
-                    .toLowerCase()
-                    .replace("-", "")
-                    .replace(" ", "")
-                )
-            ) {
-              cutJson[i][48] = "Sí está";
-            }
-
-            if (cutJson[i][48] == null) {
-              let errores = esPrediccion(placa, dataExcel1[e][1]);
-
-              if (errores == 0) {
-                errores = esPermutacion(placa, dataExcel1[e][1]);
-              }
-
-              if (errores >= 1) {
-                cutJson[i][48] =
-                  "Posible error de placa: " + dataExcel1[e][1] + " > " + placa;
-              }
-            }
-          }
-        }
-
-        for (let i = 0; i < cutJson.length; i++) {
-          if (cutJson[i][48] == null) {
-            cutJson[i][48] = "No está";
-          }
-        }
-
-        Cargar(false);
-        setExcel2(cutJson);
-      } else {
-        Notificar(
-          "Se requiere ingresar el archivo de We Supply",
-          "error",
-          "normal"
-        );
-      }
-    }
-  };
-
-  const TransformStringDate = (StringDate) => {
-    // Define the datetime format
-    const datetimeFormat = "dd/MM/yyyy hh:mm:ss a";
-
-    // Parse the datetime string
-    const dateParts = StringDate.split(" ");
-    const date = dateParts[0].split("/");
-    const time = dateParts[1].split(":");
-    const ampm = dateParts[2];
-
-    // Create a new Date object
-    const year = parseInt(date[2]);
-    const month = parseInt(date[1]) - 1; // Months are 0-based in JavaScript
-    const day = parseInt(date[0]);
-    let hour = parseInt(time[0]);
-    const minute = parseInt(time[1]);
-    const second = parseInt(time[2]);
-
-    // Adjust the hour based on AM/PM
-    if (ampm === "p. m." && hour !== 12) {
-      hour += 12;
-    } else if (ampm === "a. m." && hour === 12) {
-      hour = 0;
-    }
-
-    // Create the Date object
-    const dateObject = new Date(year, month, day, hour, minute, second);
-
-    return dateObject;
-  };
-
-  const [searchQuery, setSearchQuery] = useState("");
-
-  const handleSearchChange = (event) => {
-    setSearchQuery(event.target.value);
-  };
-
-  function ExcelDateToJSDate(date) {
-    let fecha = new Date(Math.round((date - 25569) * 86400 * 1000));
-    let result =
-      fecha.getUTCDate() +
-      "/" +
-      (fecha.getUTCMonth() + 1) +
-      "/" +
-      fecha.getUTCFullYear();
-    return isNaN(fecha.getTime()) ? "" : result;
-  }
-
-  function ExcelDateToJSTime(date) {
-    let hora = new Date(Math.round((date - 25569) * 86400 * 1000));
-    let result =
-      hora.getUTCHours() +
-      ":" +
-      hora.getUTCMinutes() +
-      ":" +
-      hora.getUTCSeconds();
-    return isNaN(hora.getTime()) ? "" : result;
-  }
-
   // Obtener los datos de la tercera tabla
-
-  const dateColumns = [16, 20, 24, 25, 26, 28, 29, 31, 45];
 
   // Identify the columns that contain date values
 
@@ -386,10 +207,11 @@ const Consult = () => {
         //45703
         const valoresExcluidos = ["45716", "45703", "45731", "45746"];
 
-        const filteredData = data.map(item => valoresExcluidos.includes(item) ? "" : item);
-        
-        
-                setDatas(filteredData);
+        const filteredData = data.map((item) =>
+          valoresExcluidos.includes(item) ? "" : item
+        );
+
+        setDatas(filteredData);
         OrganizarArreglo(filteredData);
 
         Notificar(
@@ -421,7 +243,7 @@ const Consult = () => {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    console.log("Cargando");
+
     if (id.length < 7) {
       setError("El documento debe tener al menos 7 dígitos");
       setLoading(false);
@@ -439,6 +261,7 @@ const Consult = () => {
 
       if (response.ok) {
         const data = await response.json();
+
         setConsultaNomina(data);
 
         Notificar("Su nómina se ha consultado con éxito", "success", "normal");
@@ -450,7 +273,7 @@ const Consult = () => {
         );
       }
     } catch (error) {
-      console.error("Error al consultar la pre-pre-nómina:", error);
+      console.error("Error al consultar la nómina:", error);
       Notificar(
         "Error al consultar la nómina, por favor intente de nuevo o compruebe su conexión a internet",
         "error",
@@ -540,13 +363,11 @@ const Consult = () => {
       if (Cell == "LICENCIA NO REM") {
         guardarSiguientes = 4;
       }
-      console.log(data[PosicionBono + 2]);
+
       if (
         Cell == "BONIFICACION NO SALA" &&
         data[PosicionBono + 2].length != 1
       ) {
-        console.log("CARGA");
-
         newArreglo.splice(iAr, 2, "");
       }
 
@@ -599,7 +420,6 @@ const Consult = () => {
     setDatos2(columnaActual2);
     setDatos(arregloConNull.slice(1, -1));
     setColumnas(columnasLimpias);
-    console.log(arregloConNull.slice(1, -1));
   }
 
   const getColorPorHora = (horaStr) => {
@@ -750,7 +570,9 @@ const Consult = () => {
                     <br />
                     <br />
                     {Datos.length > 0 && (
+                      
                       <div>
+                
                         <h2 className="text-center">{datas[1]}</h2>
                         <br />
                         <div className=" d-grid">
@@ -948,7 +770,18 @@ const Consult = () => {
                           " - " +
                           Consultanomina[1].Cedula}
                       </div>
+
+                      <div className="border p-3  fw-bold ">
+                        {new Date(
+                          Consultanomina[0].Fecha
+                        ).toLocaleDateString() +
+                          " - " +
+                          new Date(
+                            Consultanomina[Consultanomina.length - 1].Fecha
+                          ).toLocaleDateString()}
+                      </div>
                     </div>
+                    <br />
                     <br />
 
                     <br />
@@ -989,7 +822,7 @@ const Consult = () => {
                       <tbody>
                         {Consultanomina.map((item) => (
                           <tr key={item.idNomina}>
-                            <td>{item.Fecha}</td>
+                            <td>{new Date(item.Fecha).toLocaleDateString()}</td>
                             <td>{item.Dom_Fest}</td>
 
                             <td>{item.Codigo_2}</td>
@@ -1052,18 +885,22 @@ const Consult = () => {
                     </table>
                   )}
                 </div>
-              
-                <br />
-                <br />
-                <Chart
-                  options={chartOptions1}
-                  series={chartSeries1}
-                  type="bar"
-                  height={500}
-                  
-                />
-  <br />
-  <br />
+
+                {Consultanomina.length > 0 && (
+                  <div>
+                    <br />
+                    <br />
+                    <Chart
+                      options={chartOptions1}
+                      series={chartSeries1}
+                      type="bar"
+                      height={500}
+                    />
+                    <br />
+                    <br />
+                  </div>
+                )}
+
                 <div className="justificar  bg-warning fs-3 m-2 p-3 rounded-4  ">
                   <h2 className="fw-bold ">Nota:</h2>
                   Este aplicativo ha sido desarrollado por un aprendiz del SENA
