@@ -384,24 +384,12 @@ const Consult = () => {
       if (response.ok) {
         const data = await response.json();
         //45703
-        const filteredData = data
-          .map((item) =>
-            item === "45716"
-              ? ""
-              : item && item === "45703"
-              ? ""
-              : item && item === "45731"
-              ? ""
-              : item === " 45746"
-              ? ""
-              : item
-          )
-          .filter(
-            (item) =>
-              typeof item !== "string" || !item.includes("CONSECUTIVO -")
-          );
+        const valoresExcluidos = ["45716", "45703", "45731", "45746"];
 
-        setDatas(filteredData);
+        const filteredData = data.map(item => valoresExcluidos.includes(item) ? "" : item);
+        
+        
+                setDatas(filteredData);
         OrganizarArreglo(filteredData);
 
         Notificar(
