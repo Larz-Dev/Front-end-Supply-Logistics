@@ -603,14 +603,14 @@ const Consult = () => {
                           <div className="border p-3  fw-bold ">
                             {datas[4] + datas[5]}
                           </div>
-                         
+
                           <div className="border p-3  fw-bold ">
                             {datas[6].slice(0, -1) +
                               " $" +
                               new Intl.NumberFormat().format(datas[7])}
                           </div>
                           <div className="border p-3  fw-bold ">
-                            Fecha y hora de exportación de este documento{" "}
+                            Fecha y hora de exportación de este documento{" ● "}
                             {tiempoAhora}
                           </div>
                         </div>
@@ -790,15 +790,17 @@ const Consult = () => {
                     <br />
                     <div className=" d-grid">
                       <div className="border p-3  fw-bold ">
+                        Nombre: 
                         {Consultanomina[0].Nombre +
                           " " +
-                          Consultanomina[1].Apellido +
-                          " - " +
-                          Consultanomina[1].Cedula}
+                          Consultanomina[1].Apellido}
                       </div>
-
                       <div className="border p-3  fw-bold ">
-                        {new Date(
+                        Documento: 
+                        {Consultanomina[1].Cedula}
+                      </div>
+                      <div className="border p-3  fw-bold ">
+                        Rango de fecha con horas registradas: {new Date(
                           Consultanomina[0].Fecha
                         ).toLocaleDateString() +
                           " - " +
@@ -807,7 +809,7 @@ const Consult = () => {
                           ).toLocaleDateString()}
                       </div>
                       <div className="border p-3  fw-bold ">
-                        Fecha y hora de exportación de este documento{" "}
+                        Fecha y hora de exportación de este documento{" ● "}
                         {tiempoAhora}
                       </div>
                     </div>
