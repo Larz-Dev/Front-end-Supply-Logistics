@@ -603,14 +603,15 @@ const Consult = () => {
                           <div className="border p-3  fw-bold ">
                             {datas[4] + datas[5]}
                           </div>
-                          <div className="border p-3  fw-bold ">
-                            Fecha y hora de exportación de este documento{" "}
-                            {tiempoAhora}
-                          </div>
+                         
                           <div className="border p-3  fw-bold ">
                             {datas[6].slice(0, -1) +
                               " $" +
                               new Intl.NumberFormat().format(datas[7])}
+                          </div>
+                          <div className="border p-3  fw-bold ">
+                            Fecha y hora de exportación de este documento{" "}
+                            {tiempoAhora}
                           </div>
                         </div>
                         <br />
