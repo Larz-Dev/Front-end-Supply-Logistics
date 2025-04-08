@@ -786,21 +786,19 @@ const Consult = () => {
 
                 {Consultanomina.length > 0 && (
                   <div>
-                    <h2 className="text-center">{Consultanomina[1].nombre}</h2>
-                    <br />
-                    <div className=" d-grid">
+                    <div className=" text-start">
                       <div className="border p-3  fw-bold ">
-                        Nombre: 
+                        Nombre:{" "}
                         {Consultanomina[0].Nombre +
                           " " +
                           Consultanomina[1].Apellido}
                       </div>
                       <div className="border p-3  fw-bold ">
-                        Documento: 
-                        {Consultanomina[1].Cedula}
+                        Documento: {Consultanomina[1].Cedula}
                       </div>
                       <div className="border p-3  fw-bold ">
-                        Rango de fecha con horas registradas: {new Date(
+                        Rango de fecha con horas registradas:{" "}
+                        {new Date(
                           Consultanomina[0].Fecha
                         ).toLocaleDateString() +
                           " - " +
