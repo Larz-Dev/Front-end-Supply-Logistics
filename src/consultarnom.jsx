@@ -83,8 +83,24 @@ const Consult = () => {
       "Descanso Dominical Festivo",
       Consultanomina.map((d) => d.Descarso_dominical_o_festivo)
     ),
-  ].filter(Boolean); // Elimina las series que son null
 
+    crearSerie(
+      "Hora Dominical Diurna Ordinaria",
+      Consultanomina.map((d) => d.Hora_dominical_diurna_ordinaria)
+    ),
+    crearSerie(
+      "Hora Nocturna Festival o Dominical",
+      Consultanomina.map((d) => d.Hora_nocturna_festival_o_dominical)
+    ),
+    crearSerie(
+      "Hora Extra Diurna Festiva o Dominical",
+      Consultanomina.map((d) => d.Hora_extra_diurna_festiva_o_dominical)
+    ),
+    crearSerie(
+      "Hora Extra Nocturna Festiva o Dominical",
+      Consultanomina.map((d) => d.Hora_extra_nocturna_festiva_o_dominical)
+    ),
+  ].filter(Boolean);
   // Generar series para gráfico 2 (recargos y ordinarias)
 
   // Opciones para ambos gráficos
@@ -590,7 +606,7 @@ const Consult = () => {
                   </div>
                   <div className="" id="print-section" ref={printSectionRef}>
                     <br />
-              
+
                     {Datos.length > 0 && (
                       <div>
                         <h2 className="text-center">{datas[1]}</h2>
@@ -829,22 +845,21 @@ const Consult = () => {
                         <tr>
                           <th>Fecha</th>
                           <th>Día</th>
-
                           <th>Código</th>
                           <th>Entrada</th>
                           <th>Salida</th>
                           <th>Jornada</th>
-                          <th>Tipo Turno</th>
+                          <th>Tipo de Turno</th>
                           <th>Hora Diurna Ordinaria</th>
                           <th>Recargo Nocturno</th>
                           <th>Hora Extra Diurna</th>
                           <th>Hora Extra Nocturna</th>
-                          <th>Hora Dominical Ordinaria</th>
-                          <th>Nocturna Festival/Dom</th>
-                          <th>Extra Diurna Festiva</th>
-                          <th>Extra Nocturna Festiva</th>
-                          <th>Descanso Dominical/Festivo</th>
-                          <th>Total Horas Extra</th>
+                          <th>Hora Dominical Diurna Ordinaria</th>
+                          <th>Hora Nocturna Festival o Dominical</th>
+                          <th>Hora Extra Diurna Festiva o Dominical</th>
+                          <th>Hora Extra Nocturna Festiva o Dominical</th>
+                          <th>Descanso Dominical o Festivo</th>
+                          <th>Total de Horas Extra</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -855,7 +870,7 @@ const Consult = () => {
 
                             <td>{item.Codigo_2}</td>
                             <td
-                              className=" text-white"
+                              className=" text-white align-content-center"
                               style={{
                                 backgroundColor: getColorPorHora(
                                   item.Hora_entrada
@@ -863,10 +878,10 @@ const Consult = () => {
                                 color: "#000",
                               }}
                             >
-                              {item.Hora_entrada}
+                              <span className="bg-black bg-opacity-25 rounded-3 p-1 ">{item.Hora_entrada}</span>
                             </td>
                             <td
-                              className=" text-white"
+                              className=" text-white align-content-center"
                               style={{
                                 backgroundColor: getColorPorHora(
                                   item.Hora_salida
@@ -874,10 +889,10 @@ const Consult = () => {
                                 color: "#000",
                               }}
                             >
-                              {item.Hora_salida}
+                                  <span className="bg-black bg-opacity-25 rounded-3 p-1">{item.Hora_salida}</span>
                             </td>
                             <td
-                              className=" text-white"
+                              className=" text-white align-content-center"
                               style={{
                                 backgroundColor: getColorPorHora(
                                   item.Horas_jornada
@@ -885,7 +900,7 @@ const Consult = () => {
                                 color: "#fff",
                               }}
                             >
-                              {item.Horas_jornada}
+                                <span className="bg-black bg-opacity-25 rounded-3 p-1"> {item.Horas_jornada}</span> 
                             </td>
                             <td>{item.Tipo_turno.trim()}</td>
                             <td>{item.Hora_diurna_ordinaria.trim()}</td>
