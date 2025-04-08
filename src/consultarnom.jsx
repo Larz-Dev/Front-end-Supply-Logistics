@@ -443,7 +443,7 @@ const Consult = () => {
     const intervalId = setInterval(() => {
       const f = new Date(Date.now());
       const stringfecha =
-        "• " +
+      
         f.getDate() +
         "/" +
         (f.getMonth() + 1) +
@@ -610,8 +610,7 @@ const Consult = () => {
                               new Intl.NumberFormat().format(datas[7])}
                           </div>
                           <div className="border p-3  fw-bold ">
-                            Fecha y hora de exportación de este documento{" ● "}
-                            {tiempoAhora}
+                            Fecha y hora de exportación de este documento{" ● "}{tiempoAhora}
                           </div>
                         </div>
                         <br />
@@ -807,8 +806,7 @@ const Consult = () => {
                           ).toLocaleDateString()}
                       </div>
                       <div className="border p-3  fw-bold ">
-                        Fecha y hora de exportación de este documento{" ● "}
-                        {tiempoAhora}
+                        Fecha y hora de exportación de este documento{" ● "}{tiempoAhora}
                       </div>
                     </div>
                     <br />
