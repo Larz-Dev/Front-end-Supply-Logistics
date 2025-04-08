@@ -199,7 +199,7 @@ const Nomina = () => {
         );
       });
     });
-    console.log(filtro);
+
     try {
       let response = await fetch(variables("API") + "/prenom/update", {
         method: "PUT", // Specify the method if needed (GET is default)

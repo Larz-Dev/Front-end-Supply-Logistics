@@ -22,13 +22,16 @@ const Consult = () => {
   const [Posicionrestar, setPosicionrestar] = useState(0);
   const [Consultanomina, setConsultaNomina] = useState([]);
   const [mostrarVentana1, setMostrarVentana1] = useState(true);
+  const [tiempoAhora, setTiempoAhora] = useState("");
 
   const [FechaInicioQ, setFechaInicioQ] = useState([]);
   const [FechaFinQ, setFechaFinQ] = useState([]);
 
   const [sliderValue, setSliderValue] = useState(0);
   const printSectionRef = useRef();
-  const fechas = Consultanomina.map((d) =>new Date( d.Fecha).toLocaleDateString());
+  const fechas = Consultanomina.map((d) =>
+    new Date(d.Fecha).toLocaleDateString()
+  );
 
   const parseHoras = (valor) => {
     const num = parseFloat((valor ?? "").toString().trim());
@@ -147,13 +150,12 @@ const Consult = () => {
         Consultanomina[1].Apellido +
         " - " +
         Consultanomina[1].Cedula +
-        " - " +new Date(
-          Consultanomina[0].Fecha
+        " - " +
+        new Date(Consultanomina[0].Fecha).toLocaleDateString() +
+        " - " +
+        new Date(
+          Consultanomina[Consultanomina.length - 1].Fecha
         ).toLocaleDateString() +
-          " - " +
-          new Date(
-            Consultanomina[Consultanomina.length - 1].Fecha
-          ).toLocaleDateString() +
         ".pdf",
       jsPDF: {
         unit: "mm",
@@ -437,6 +439,28 @@ const Consult = () => {
     return "#5F7CD3"; // Noche
   };
 
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      const f = new Date(Date.now());
+      const stringfecha =
+        "• " +
+        f.getDate() +
+        "/" +
+        (f.getMonth() + 1) +
+        "/" +
+        f.getFullYear() +
+        " " +
+        f.getHours() +
+        ":" +
+        f.getMinutes() +
+        ":" +
+        f.getSeconds();
+      setTiempoAhora(stringfecha);
+    }, 1000); // update every 1 second
+
+    return () => clearInterval(intervalId);
+  }, []);
+
   return (
     <div className="">
       <header className="bg-supply py-3 shadow-sm ">
@@ -570,9 +594,7 @@ const Consult = () => {
                     <br />
                     <br />
                     {Datos.length > 0 && (
-                      
                       <div>
-                
                         <h2 className="text-center">{datas[1]}</h2>
                         <br />
                         <div className=" d-grid">
@@ -581,7 +603,10 @@ const Consult = () => {
                           <div className="border p-3  fw-bold ">
                             {datas[4] + datas[5]}
                           </div>
-
+                          <div className="border p-3  fw-bold ">
+                            Fecha y hora de exportación de este documento{" "}
+                            {tiempoAhora}
+                          </div>
                           <div className="border p-3  fw-bold ">
                             {datas[6].slice(0, -1) +
                               " $" +
@@ -779,6 +804,10 @@ const Consult = () => {
                           new Date(
                             Consultanomina[Consultanomina.length - 1].Fecha
                           ).toLocaleDateString()}
+                      </div>
+                      <div className="border p-3  fw-bold ">
+                        Fecha y hora de exportación de este documento{" "}
+                        {tiempoAhora}
                       </div>
                     </div>
                     <br />
