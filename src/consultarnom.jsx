@@ -503,7 +503,7 @@ const Consult = () => {
           <button
             className={`btn ${
               mostrarVentana1 ? "btn-primary bg-supply" : "btn-secondary"
-            } mx-2`}
+            } mx-2 my-1`}
             onClick={() => setMostrarVentana1(true)}
           >
             Consultar pre-nómina
@@ -511,7 +511,7 @@ const Consult = () => {
           <button
             className={`btn ${
               !mostrarVentana1 ? "btn-success" : "btn-secondary"
-            } mx-2`}
+            } mx-2 my-1`}
             onClick={() => setMostrarVentana1(false)}
           >
             Consultar cierre de nómina
