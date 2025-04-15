@@ -10,3 +10,16 @@
 
 
 
+.sidebar-minimized {
+  width: 60px;
+
+}
+
+.sidebar-full {
+  width: 100%;
+  transition: width 0.3s ease;
+}
+
+
+
+

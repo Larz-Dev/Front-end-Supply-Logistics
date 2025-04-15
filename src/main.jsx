@@ -1,5 +1,3 @@
-
-
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./app.jsx";
@@ -21,6 +19,7 @@ import Graficas2 from "./graphs2.jsx";
 import Sqlvehicles from "./sqlvehicles.jsx";
 import Compare from "./compare2.jsx";
 import Consult from "./consultarnom.jsx";
+import AppConductor from "./appconductor.jsx";
 import Horario from "./horario.jsx";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
@@ -31,14 +30,15 @@ ReactDOM.createRoot(document.getElementById("root")).render(
         <Route path="/app" element={<App />} />
         <Route path="/database" element={<Database />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/appconductor" element={<AppConductor />} />
         <Route path="/register" element={<Register />} />
         <Route path="/tools" element={<Tools />} />
         <Route path="/graphs" element={<Graficas />} />
         <Route path="/graphs2" element={<Graficas2 />} />
+
         <Route path="/sql" element={<Sqlvehicles />} />
         <Route path="/compare" element={<Compare />} />
-     <Route path="/consult" element={<Consult />} />
-
+        <Route path="/consult" element={<Consult />} />
       </Routes>
     </BrowserRouter>
   </React.StrictMode>

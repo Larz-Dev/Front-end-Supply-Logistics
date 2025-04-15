@@ -9,19 +9,11 @@ import {
   Notificar,
 } from "./funciones.jsx";
 
-import loadingPost from "./assets/images/PostLoading.gif";
-import loadingProfile from "./assets/images/ProfileLoading.gif";
-
-import ImageMaximizer from "./maximizer.jsx";
 import Sidebar from "./sidebar.jsx";
-import * as XLSX from "xlsx";
-import EditarRecibo from "./Editar.jsx";
+
+import CrearProgramacion from "./crearprogramacion.jsx";
 function App() {
   Validarsesion();
-
-  if (sessionStorage.getItem("rol") == 4) {
-    window.location = "/appconductor";
-  }
   document.body.style = "background: #dee2e6;";
   const [programaciones, setProgramaciones] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -37,6 +29,7 @@ function App() {
   const [observacion, setObservacion] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const postsPerPage = 6; // o cualquier número de publicaciones por página que desees
+  const [actualizar, setActualizar] = useState(true);
 
   // Lógica de paginación
   const indexOfLastPost = currentPage * postsPerPage;
@@ -88,17 +81,28 @@ function App() {
   });
 
   useEffect(() => {
+    if (actualizar) {
+      fetchProgramaciones();
+    }
+  }, [actualizar]);
+
+  const fetchProgramaciones = async () => {
     FetchProgramaciones();
-  }, []);
+    setActualizar(false); // Reinicia el estado después de actualizar
+  };
 
   const FetchProgramaciones = () => {
-    fetch(variables("API") + "/programacion/listingbypagination", {
+    fetch(variables("API") + "/programacion/listingbypaginationbyid", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${sessionStorage.getItem("token")}`,
       },
-      body: JSON.stringify({ inicio: 0, fin: 20 }),
+      body: JSON.stringify({
+        inicio: 0,
+        fin: 20,
+        id: sessionStorage.getItem("idUsuario"),
+      }),
     })
       .then((res) => res.json())
       .then((data) => {
@@ -141,6 +145,7 @@ function App() {
   }, [searchTerm, programaciones]);
   return (
     <>
+      <CrearProgramacion onCreated={() => setActualizar(true)} />
       <div className="row">
         <Cabecera></Cabecera>
 
@@ -170,53 +175,11 @@ function App() {
 
           <div className="  justify-content-md-center mt-3">
             {" "}
-            <div className=" row  mx-4 py-1">
-              <button
-                className="btn  btn-success "
-                onClick={() => {
-                  exportar("filtro");
-                }}
-              >
-                Exportar Excel
-              </button>
-            </div>
-            <div className=" row  mx-4 py-1">
-              <button
-                className="btn  btn-warning "
-                onClick={() => {
-                  exportar("todo");
-                }}
-              >
-                Cargar todos
-              </button>
-            </div>
-            <div className=" d-flex align-items-center m-3 ">
-              Entre
-              <input
-                type="date"
-                placeholder="Inicio"
-                className="inner-shadow rounded form-control mx-2 py-3"
-                name="inicio"
-                id="inicio"
-                value={rangoInicio}
-                onChange={(event) => setRangoInicio(event.target.value)}
-              />
-              y
-              <input
-                type="date"
-                placeholder="Fin"
-                className="inner-shadow rounded form-control mx-2 py-3"
-                name="fin"
-                id="fin"
-                value={rangoFin}
-                onChange={(event) => setRangoFin(event.target.value)}
-              />
-            </div>
             <div className=" d-flex align-items-center m-3">
               <i className="fa-solid fa-magnifying-glass"></i>
               <input
                 type="text"
-                placeholder="Buscar por transportadora, placa, área, o concepto"
+                placeholder="placa"
                 className="inner-shadow rounded form-control mx-2"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -267,20 +230,7 @@ function App() {
                           {programacion.vehiculo.placa} (
                           {programacion.vehiculo.tipo})
                         </p>
-                        <p className="card-text mb-1">
-                          <strong>Conductor:</strong>{" "}
-                          {programacion.conductor.Nombre1}{" "}
-                          {programacion.conductor.Nombre2}{" "}
-                          {programacion.conductor.Apellido1}{" "}
-                          {programacion.conductor.Apellido2}{" "}
-                          <span className=" text-light-emphasis">
-                            ({programacion.conductor.phone})
-                          </span>
-                        </p>
-                        <p className="card-text mb-1">
-                          <strong>Transportadora:</strong>{" "}
-                          {programacion.conductor.transportadora.nombre}
-                        </p>
+
                         <p className="card-text mb-1">
                           <strong>Fecha estimada:</strong>{" "}
                           {new Date(
@@ -332,16 +282,17 @@ function App() {
                         <div className="text-end">
                           {!programacion.fechaFinServicio &&
                             !programacion.fechaInicioServicio &&
-                            programacion.estado != "Cancelado" && (
+                            (programacion.estado == "En curso" ||
+                              programacion.estado == "Retraso") && (
                               <div>
                                 <a
-                                  className="btn bg-supply fw-bold text-white"
+                                  className="btn btn-primary fw-bold text-white"
                                   data-bs-toggle="modal"
                                   data-bs-target="#finishPostModal"
                                   onClick={() => handleclose(programacion)}
                                 >
                                   {" "}
-                                  Finalizar
+                                  Observacion
                                 </a>
                               </div>
                             )}
@@ -423,7 +374,13 @@ function App() {
               ></button>
             </div>
             <div className="modal-body fs-3">
-              Estas seguro de que desa finalizar este servicio?
+              Desea dejar una observación?
+              <p>
+                {" "}
+                <span className=" text-mute fs-6">
+                  (Esta será observada por los administradores)
+                </span>
+              </p>
             </div>
 
             <div className=" p-3 bor">
@@ -467,20 +424,7 @@ function App() {
                         {selectedprogramm.vehiculo.placa} (
                         {selectedprogramm.vehiculo.tipo})
                       </p>
-                      <p className="card-text mb-1">
-                        <strong>Conductor:</strong>{" "}
-                        {selectedprogramm.conductor.Nombre1}{" "}
-                        {selectedprogramm.conductor.Nombre2}{" "}
-                        {selectedprogramm.conductor.Apellido1}{" "}
-                        {selectedprogramm.conductor.Apellido2}{" "}
-                        <span className=" text-light-emphasis">
-                          ({selectedprogramm.conductor.phone})
-                        </span>
-                      </p>
-                      <p className="card-text mb-1">
-                        <strong>Transportadora:</strong>{" "}
-                        {selectedprogramm.conductor.transportadora.nombre}
-                      </p>
+
                       <p className="card-text mb-1">
                         <strong>Fecha estimada:</strong>{" "}
                         {new Date(
@@ -505,13 +449,6 @@ function App() {
                             </p>
                           </>
                         )}
-
-                      {selectedprogramm.contacto && (
-                        <p className="card-text mb-1">
-                          <strong>Dirección:</strong>{" "}
-                          {selectedprogramm.contacto}
-                        </p>
-                      )}
                     </div>
                     <div className="card-footer text-muted">
                       Programado el{" "}
@@ -535,60 +472,10 @@ function App() {
                   </div>
                 </div>
               )}
-              <br />
+
               <div className=" modal-title">
                 <div className="row">
                   <div className="col">
-                    <label htmlFor="" className=" form-label">
-                      Inicio de servicio
-                    </label>
-                    <input
-                      type="datetime-local"
-                      name="fechaInicioServicio"
-                      className=" form-control"
-                      value={fechaInicio}
-                      onChange={(event) => setfechaInicio(event.target.value)}
-                    />
-                    <p></p>
-                    <label
-                      htmlFor=""
-                      name="fechaFinServicio"
-                      className="form-label"
-                    >
-                      Inicio de servicio
-                    </label>
-
-                    <input
-                      type="datetime-local"
-                      className=" form-control"
-                      value={fechaFin}
-                      onChange={(event) => setfechaFin(event.target.value)}
-                    />
-                  </div>
-
-                  <div className="col">
-                    <label
-                      htmlFor=""
-                      name="fechaFinServicio"
-                      className="form-label"
-                    >
-                      Razón
-                    </label>
-
-                    <select
-                      name=""
-                      id=""
-                      className=" form-select"
-                      value={estado}
-                      onChange={(event) => setestado(event.target.value)}
-                    >
-                      <option value="">Seleccionar...</option>
-                      <option className="" value="Finalizado">
-                        Finalizar
-                      </option>
-                      <option value="Cancelado">Cancelar</option>
-                    </select>
-
                     <label
                       htmlFor=""
                       name="fechaFinServicio"
@@ -619,36 +506,35 @@ function App() {
               >
                 Cancelar
               </button>
-              <button
-                type="button"
-                className="btn bg-supply text-white"
-                onClick={() => {
-                  // Send POST request to delete the post
-                  if (
-                    fechaFin != "" &&
-                    fechaInicio != "" &&
-                    estado == "Finalizado"
-                  ) {
-                    fetch(variables("API") + `/programacion/finish`, {
-                      method: "POST", // Specify the method if needed (GET is default)
-                      headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${sessionStorage.getItem(
-                          "token"
-                        )}`, // Include the token in the Authorization header
-                      },
-                      body: JSON.stringify({
-                        idProgramacion: selectedprogramm.idProgramacion,
-                        fechaInicioServicio: fechaInicio,
-                        fechaFinServicio: fechaFin,
-                        estado: estado,
-                        observacionessistema: observacion,
-                      }),
-                    })
+
+              {selectedprogramm.estado == "En curso" && (
+                <button
+                  type="button"
+                  className="btn bg-warning text-white"
+                  onClick={() => {
+                    // Send POST request to delete the post
+
+                    fetch(
+                      variables("API") + `/programacion/estadobyconductor`,
+                      {
+                        method: "POST", // Specify the method if needed (GET is default)
+                        headers: {
+                          "Content-Type": "application/json",
+                          Authorization: `Bearer ${sessionStorage.getItem(
+                            "token"
+                          )}`, // Include the token in the Authorization header
+                        },
+                        body: JSON.stringify({
+                          idProgramacion: selectedprogramm.idProgramacion,
+                          estado: "Retraso",
+                        }),
+                      }
+                    )
                       .then((response) => response.json())
                       .then((data) => {
                         Notificar(data.mensaje, data.status, "normal");
                         setprogramm([]);
+                        setObservacion("");
                         FetchProgramaciones();
                         document
                           .getElementById("finishPostModal")
@@ -665,56 +551,70 @@ function App() {
                           "normal"
                         );
                       });
-                  } else {
-                    if (estado == "Cancelado") {
-                      fetch(variables("API") + `/programacion/finish`, {
-                        method: "POST", // Specify the method if needed (GET is default)
-                        headers: {
-                          "Content-Type": "application/json",
-                          Authorization: `Bearer ${sessionStorage.getItem(
-                            "token"
-                          )}`, // Include the token in the Authorization header
-                        },
-                        body: JSON.stringify({
-                          idProgramacion: selectedprogramm.idProgramacion,
-                          fechaInicioServicio: fechaInicio,
-                          fechaFinServicio: fechaFin,
-                          estado: estado,
-                          observacionessistema: observacion,
-                        }),
-                      })
-                        .then((response) => response.json())
-                        .then((data) => {
-                          Notificar(data.mensaje, data.status, "normal");
-                          setprogramm([]);
-                          FetchProgramaciones();
-                          document
-                            .getElementById("finishPostModal")
-                            .classList.remove("show");
-                          document
-                            .getElementById("finishPostModal")
-                            .setAttribute("aria-hidden", "true");
-                          document.querySelector(".modal-backdrop").remove();
-                        })
-                        .catch((error) => {
-                          Notificar(
-                            "No se ha podido establecer conexión con el servidor",
-                            "error",
-                            "normal"
-                          );
-                        });
-                    } else {
-                      Notificar(
-                        "Porfavor, establecer los tiempos de servicio",
-                        "error",
-                        "normal"
-                      );
-                    }
-                  }
-                }}
-              >
-                Finalizar
-              </button>
+                  }}
+                >
+                  Notificar retraso
+                </button>
+              )}
+
+              {selectedprogramm.estado != "Finalizado" &&
+                selectedprogramm.estado != "Cancelado" && (
+                  <button
+                    type="button"
+                    className="btn bg-primary text-white"
+                    onClick={() => {
+                      // Send POST request to delete the post
+                      if (observacion != "") {
+                        fetch(
+                          variables("API") +
+                            `/programacion/observacionyyConductor`,
+                          {
+                            method: "POST", // Specify the method if needed (GET is default)
+                            headers: {
+                              "Content-Type": "application/json",
+                              Authorization: `Bearer ${sessionStorage.getItem(
+                                "token"
+                              )}`, // Include the token in the Authorization header
+                            },
+                            body: JSON.stringify({
+                              idProgramacion: selectedprogramm.idProgramacion,
+                              observaciones: observacion,
+                            }),
+                          }
+                        )
+                          .then((response) => response.json())
+                          .then((data) => {
+                            Notificar(data.mensaje, data.status, "normal");
+                            setprogramm([]);
+                            setObservacion("");
+                            FetchProgramaciones();
+                            document
+                              .getElementById("finishPostModal")
+                              .classList.remove("show");
+                            document
+                              .getElementById("finishPostModal")
+                              .setAttribute("aria-hidden", "true");
+                            document.querySelector(".modal-backdrop").remove();
+                          })
+                          .catch((error) => {
+                            Notificar(
+                              "No se ha podido establecer conexión con el servidor",
+                              "error",
+                              "normal"
+                            );
+                          });
+                      } else {
+                        Notificar(
+                          "Porfavor, establecer los tiempos de servicio",
+                          "error",
+                          "normal"
+                        );
+                      }
+                    }}
+                  >
+                    Observación
+                  </button>
+                )}
             </div>
           </div>
         </div>

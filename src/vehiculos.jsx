@@ -3,13 +3,15 @@ import { variables, Notificar } from "./funciones";
 
 const Vehiculo = () => {
   const [vehiculos, setVehiculos] = useState([]);
-  const [transportadoras, setTransportadoras] = useState([]);
+
   const [formData, setFormData] = useState({
     idVehiculo: "",
     placa: "",
-    transportadora: "",
     tipo: "",
+    idConductor: "", // nuevo campo
   });
+  const [conductorInputValue, setConductorInputValue] = useState("");
+
   const [editing, setEditing] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -17,6 +19,8 @@ const Vehiculo = () => {
   const [totalPosts, setTotalPosts] = useState(0);
   const [selectedOption, setSelectedOption] = useState("");
   const [freeText, setFreeText] = useState("");
+  const [conductoresList, setConductoresList] = useState([]);
+  const [selectedConductor, setSelectedConductor] = useState(null);
 
   const totalPages = Math.ceil(totalPosts / postsPerPage);
   const goToNextPage = () => {
@@ -45,6 +49,24 @@ const Vehiculo = () => {
 
   const indexOfLastPost = currentPage * postsPerPage;
   const indexOfFirstPost = indexOfLastPost - postsPerPage;
+
+  useEffect(() => {
+    fetchConductores();
+  }, []);
+
+  const fetchConductores = async () => {
+    try {
+      const res = await fetch(variables("API") + "/conductor/listing", {
+        headers: {
+          Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+        },
+      });
+      const data = await res.json();
+      setConductoresList(data);
+    } catch (error) {
+      Notificar("Error al cargar conductores", "error", "normal");
+    }
+  };
 
   // Fetch paginated vehiculos
   const fetchVehiculos = async () => {
@@ -89,29 +111,6 @@ const Vehiculo = () => {
     setFreeText(event.target.value);
   };
 
-  // Fetch transportadoras on component mount
-  useEffect(() => {
-    const fetchTransportadoras = async () => {
-      try {
-        const response = await fetch(
-          variables("API") + "/transportadora/listing",
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${sessionStorage.getItem("token")}`,
-            },
-          }
-        );
-        const data = await response.json();
-        setTransportadoras(data);
-      } catch (error) {
-        console.error("Error al obtener las transportadoras:", error);
-      }
-    };
-    fetchTransportadoras();
-  }, []);
-
   // Fetch vehiculos whenever the page or index changes
   useEffect(() => {
     fetchVehiculos();
@@ -122,30 +121,7 @@ const Vehiculo = () => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
-  const handleTransportadoraSelect = (event) => {
-    const selectedTransportadoraName = event.target.value;
-  
-    // Find the selected transportadora by its name
-    const selectedTransportadora = transportadoras.find(
-      (t) => t.nombre === selectedTransportadoraName
-    );
-  
-    if (selectedTransportadora) {
-      // Update formData with the selected transportadora's id and name
-      setFormData({
-        ...formData,
-        transportadora: selectedTransportadora.nombre, // Set the name of the transportadora
-        idTransportadora: selectedTransportadora.idTransportadora, // Set the idTransportadora directly
-      });
-    } else {
-      // If no transportadora is found, reset the transportadora fields
-      setFormData({
-        ...formData,
-        transportadora: "", // Reset the name
-        idTransportadora: null, // Reset the id
-      });
-    }
-  };
+
   const goToJumpPage = () => {
     const newPage = currentPage + 30;
     if (newPage <= totalPages) {
@@ -174,8 +150,6 @@ const Vehiculo = () => {
 
       const dataToSend = {
         ...formData,
-        idTransportadora:
-          formData.idTransportadora === "" ? null : formData.idTransportadora, // Set to null if it's an empty string
       };
 
       const response = await fetch(url, {
@@ -192,7 +166,7 @@ const Vehiculo = () => {
         setFormData({
           idVehiculo: "",
           placa: "",
-          idTransportadora: "",
+
           tipo: "",
         });
         setEditing(false);
@@ -205,15 +179,26 @@ const Vehiculo = () => {
 
   // Edit and delete handlers
   const handleEdit = (vehiculo) => {
+    const selected = conductoresList.find(
+      (c) => c.idConductor === vehiculo.idConductor
+    );
+  
+    setSelectedConductor(selected || null);
+    setConductorInputValue(
+      selected ? `${selected.Nombre1} ${selected.Nombre2}` : ""
+    );
+  
     setFormData({
       idVehiculo: vehiculo.idVehiculo,
       placa: vehiculo.placa,
-      transportadora: vehiculo.transportadora?.nombre || "", // Set the name of the transportadora
-      idTransportadora: vehiculo.transportadora?.idTransportadora || "", // Set the idTransportadora
       tipo: vehiculo.tipo,
+      idConductor: vehiculo.conductor.idConductor, // Esto es correcto, deberías asegurarte de que se actualice correctamente
     });
+  
     setEditing(true);
   };
+  
+
   const handleDelete = async (idVehiculo) => {
     try {
       const response = await fetch(variables("API") + "/vehiculo/delete", {
@@ -238,9 +223,6 @@ const Vehiculo = () => {
       (vehiculo.placa?.toLowerCase() || "").includes(
         searchTerm.toLowerCase()
       ) ||
-      (vehiculo.transportadora?.nombre?.toLowerCase() || "").includes(
-        searchTerm.toLowerCase()
-      ) ||
       (vehiculo.tipo?.toLowerCase() || "").includes(searchTerm.toLowerCase())
   );
 
@@ -258,19 +240,7 @@ const Vehiculo = () => {
           placeholder="Placa"
           required
         />
-      <input
-  list="transportadoras"
-  className="form-control m-2 p-3"
-  name="transportadora"
-  onChange={handleTransportadoraSelect}
-  value={formData.transportadora || ""} // Show the name of the selected transportadora
-  placeholder="Seleccionar Transportadora"
-/>
-        <datalist id="transportadoras">
-          {transportadoras.map((t) => (
-            <option key={t.idTransportadora} value={t.nombre} />
-          ))}
-        </datalist>
+
         <input
           list="tipo-options"
           className="form-control m-2 p-3"
@@ -286,6 +256,59 @@ const Vehiculo = () => {
           <option value="Turbo" />
           <option value="Turbo 350" />
           <option value="Turbo 600" />
+        </datalist>
+
+        <input
+          name="conductor"
+          type="text"
+          className="form-control m-2 p-3"
+          placeholder="Seleccione conductor"
+          list="conductoresList"
+          value={conductorInputValue}
+          onChange={(e) => {
+            const input = e.target.value;
+            setConductorInputValue(input);
+          
+            // Buscar coincidencias parciales
+            const selected = conductoresList.find((c) => {
+              const fullName = `${c.Nombre1} ${c.Nombre2}`;
+              return fullName.toLowerCase().includes(input.toLowerCase());
+            });
+          
+            setSelectedConductor(selected || null);
+          
+            if (selected) {
+              setFormData((prev) => ({
+                ...prev,
+                idConductor: selected.idConductor,
+              }));
+            }
+          }}
+          
+          onBlur={() => {
+            // Si al perder foco el valor no es válido, limpiamos idConductor
+            const match = conductoresList.find((c) => {
+              const fullName = `${c.Nombre1} ${c.Nombre2}`;
+              return (
+                fullName.toLowerCase() === conductorInputValue.toLowerCase()
+              );
+            });
+
+            if (!match) {
+              setFormData((prev) => ({
+                ...prev,
+                idConductor: "",
+              }));
+            }
+          }}
+        />
+
+        <datalist id="conductoresList">
+          {conductoresList.map((c) => (
+            <option key={c.idConductor} value={`${c.Nombre1} ${c.Nombre2}`}>
+              {c.documento}
+            </option>
+          ))}
         </datalist>
 
         <button
@@ -311,8 +334,8 @@ const Vehiculo = () => {
             <tr>
               <th>ID</th>
               <th>Placa</th>
-              <th>Transportadora</th>
               <th>Tipo</th>
+              <th>Conductor</th>
               <th>Acciones</th>
             </tr>
           </thead>
@@ -321,8 +344,10 @@ const Vehiculo = () => {
               <tr key={vehiculo.idVehiculo}>
                 <td>{vehiculo.idVehiculo}</td>
                 <td>{vehiculo.placa}</td>
-                <td>{vehiculo.transportadora?.nombre || "Sin asignar"}</td>
                 <td>{vehiculo.tipo}</td>
+                <td>
+                  {vehiculo.conductor.Nombre1} {vehiculo.conductor.Nombre2}
+                </td>
                 <td>
                   <button
                     className="btn btn-warning m-1"

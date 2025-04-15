@@ -99,8 +99,9 @@ const Nomina = () => {
   const TranscribirExcel2 = async (sheet) => {
     const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1, raw: false });
 
-    const arregloProcesado = jsonData.filter(row => row[0] !== null && row[0] !== "" && row[0] !== undefined);
-      
+    const arregloProcesado = jsonData.filter(
+      (row) => row[0] !== null && row[0] !== "" && row[0] !== undefined
+    );
 
     setreadyUpload2(1);
     setuploadNom2(arregloProcesado);
@@ -266,24 +267,23 @@ const Nomina = () => {
   };
 
   return (
-    <div className="col m-3">
-      <div>
+    <div className="row m-3">
+      <div className="col-md-6">
         <div className="row">
-          <div className="col-4"></div>
-          <div className="col-4 text-center">
+      <div className="text-center">
             <p></p>
             <h3>
               <strong className="badge bg-supply">Actualizar pre-nómina</strong>
             </h3>
           </div>
-          <div className="col-4"></div>
+          
         </div>
 
-        <div className=" text-justify mx-5">
+        <div className=" text-justify ">
           <h5 className="fw-bold just">Instrucciones:</h5>
 
           <div className="justificar ">
-            Al recibir el archivo .xlsx de pre-nómina que es enviado por correo,
+            Al recibir el archivo Excel(.xlsx o .xls) de pre-nómina que es enviado por correo,
             debe colocarlo en el siguiente formulario, y seguidamente presionar
             el botón "Subir pre-nómina a la nube", esto actualizará la
             pre-nómina en la base de datos, descartando la anterior.
@@ -292,7 +292,7 @@ const Nomina = () => {
 
         <div className="border-bottom my-3"></div>
 
-        <div className="row mx-4">
+        <div className="row ">
           <h3>Adjuntar documento</h3>
 
           <input
@@ -321,10 +321,10 @@ const Nomina = () => {
 
         <br />
       </div>
-      <div>
+      <div className="col-md-6">
         <div className="row">
-          <div className="col-4"></div>
-          <div className="col-4 text-center">
+         
+          <div className=" text-center">
             <p></p>
             <h3>
               <strong className="badge bg-supply">Actualizar nómina</strong>
@@ -333,11 +333,11 @@ const Nomina = () => {
           <div className="col-4"></div>
         </div>
 
-        <div className=" text-justify mx-5">
+        <div className=" text-justify ">
           <h5 className="fw-bold just">Instrucciones:</h5>
 
           <div className="justificar ">
-            Al recibir el archivo .xlsx de pre-nómina que es enviado por correo,
+            Debe subir el archivo Excel(.xlsx o .xls) de nómina,
             debe colocarlo en el siguiente formulario, y seguidamente presionar
             el botón "Subir nómina a la nube", esto actualizará la nómina en la
             base de datos, descartando la anterior.
@@ -346,7 +346,7 @@ const Nomina = () => {
 
         <div className="border-bottom my-3"></div>
 
-        <div className="row mx-4">
+        <div className="row ">
           <h3>Adjuntar documento</h3>
 
           <input

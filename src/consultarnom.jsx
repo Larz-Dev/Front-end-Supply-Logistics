@@ -223,7 +223,7 @@ const Consult = () => {
       if (response.ok) {
         const data = await response.json();
         //45703
-        const valoresExcluidos = ["45716", "45703", "45731", "45746"];
+        const valoresExcluidos = ["45716", "45703", "45731", "45746","45762"];
 
         const filteredData = data.map((item) =>
           valoresExcluidos.includes(item) ? "" : item
@@ -456,7 +456,7 @@ const Consult = () => {
   };
 
   useEffect(() => {
-    const intervalId = setInterval(() => {
+  
       const f = new Date(Date.now());
       const stringfecha =
         f.getDate() +
@@ -471,10 +471,8 @@ const Consult = () => {
         ":" +
         f.getSeconds();
       setTiempoAhora(stringfecha);
-    }, 1000); // update every 1 second
-
-    return () => clearInterval(intervalId);
-  }, []);
+ 
+})
 
   return (
     <div className="">
@@ -503,7 +501,7 @@ const Consult = () => {
           <button
             className={`btn ${
               mostrarVentana1 ? "btn-primary bg-supply" : "btn-secondary"
-            } mx-2`}
+            } mx-2 my-1 fw-bold fs-3`}
             onClick={() => setMostrarVentana1(true)}
           >
             Consultar pre-nómina
@@ -511,10 +509,10 @@ const Consult = () => {
           <button
             className={`btn ${
               !mostrarVentana1 ? "btn-success" : "btn-secondary"
-            } mx-2`}
+            } mx-2 my-1 fw-bold fs-3`}
             onClick={() => setMostrarVentana1(false)}
           >
-            Consultar cierre de nómina
+           Consultar dias y horas trabajadas
           </button>
         </div>
       </div>
@@ -522,7 +520,7 @@ const Consult = () => {
         {/* Ventana 1 */}
         {mostrarVentana1 && (
           <div className="ventana1 p-3 border rounded bg-light">
-            <h2 className="text-center ">Consultar pre-nómina</h2>
+            <h2 className="text-center fw-bold">Consultar pre-nómina</h2>
 
             <div className="row mx-auto">
               <div className="col-sm-4 p-4">
@@ -531,7 +529,7 @@ const Consult = () => {
                   <h5 className="fw-bold ">Instrucciones:</h5>
                   Ingrese su número de documento, luego deslice la barra hasta
                   que se ponga de color verde y presione el botón 'Consultar
-                  pre-nómina'
+                  pre-nómina.
                 </div>
               </div>
               <div className="col-sm-4 ">
@@ -742,7 +740,7 @@ const Consult = () => {
         {!mostrarVentana1 && (
           <div className="ventana2 p-3 border rounded bg-light">
             <div className="text-center">
-              <h2 className="text-center ">Consultar cierre de nómina</h2>
+              <h2 className="text-center fw-bold">Consultar dias y horas trabajadas</h2>
 
               <div className="row mx-auto">
                 <div className="col-sm-4 p-4">
@@ -751,7 +749,7 @@ const Consult = () => {
                     <h5 className="fw-bold ">Instrucciones:</h5>
                     Ingrese su número de documento, luego deslice la barra hasta
                     que se ponga de color verde y presione el botón 'Consultar
-                    cierre de nómina'
+                    cierre de nómina.
                   </div>
                 </div>
                 <div className="col-sm-4 ">

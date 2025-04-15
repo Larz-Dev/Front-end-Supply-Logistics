@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { variables,Notificar } from "./funciones";
-
+import { variables, Notificar } from "./funciones";
 
 const Transportadora = () => {
   const [transportadoras, setTransportadoras] = useState([]);
@@ -82,8 +81,7 @@ const Transportadora = () => {
         });
       }
       const data = await response.json();
-      Notificar(data.mensaje,data.status,"normal")
-
+      Notificar(data.mensaje, data.status, "normal");
 
       // Limpiar el formulario y volver a cargar las transportadoras
       setFormData({
@@ -132,8 +130,7 @@ const Transportadora = () => {
         }
       );
       const data = await response.json();
-      Notificar(data.mensaje,data.status,"normal")
-
+      Notificar(data.mensaje, data.status, "normal");
 
       const responseTransportadoras = await fetch(
         variables("API") + "/transportadora/listing",
@@ -189,21 +186,17 @@ const Transportadora = () => {
           {editing ? "Actualizar" : "Crear"}
         </button>
       </form>
-    
 
       <p></p>
-     
 
-     <input
-         type="text"
-         placeholder="Buscar..."
-         value={searchTerm}
-         onChange={(e) => setSearchTerm(e.target.value)}
-         className="form-control mb-3"
-       />
+      <input
+        type="text"
+        placeholder="Buscar..."
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        className="form-control mb-3"
+      />
       <div style={{ maxHeight: "250px", overflowY: "auto", overflowX: "auto" }}>
-   
-     
         <table
           className="table table-responsive table-striped table-hover"
           cellSpacing="1"
@@ -226,6 +219,7 @@ const Transportadora = () => {
                 <td>{transportadora.nombre}</td>
                 <td>{transportadora.siglas}</td>
                 <td>{transportadora.observaciones}</td>
+                
                 <td>
                   <button
                     className="btn btn-warning m-1"

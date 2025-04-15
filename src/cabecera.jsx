@@ -6,20 +6,23 @@ import logo from "./assets/images/Logo.png";
 const Cabecera = () => {
   const [profileImage, setProfileImage] = useState(null);
   const [timer, setTimer] = useState(""); // State for the timer
-
+  let tipo = "";
   Validarsesion();
 
   useEffect(() => {
     // Fetch the profile image
-    fetch(variables("API") + "/usuario/profile", {
+    if (sessionStorage.getItem("rol") <= 3) {
+      tipo = "usuario";
+    } else {
+      tipo = "conductor";
+    }
+    fetch(variables("API") + "/" + tipo + "/profile", {
       method: "Post",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${sessionStorage.getItem("token")}`,
       },
-      body: JSON.stringify({
-        idUsuario: sessionStorage.getItem("idUsuario"),
-      }),
+      body: JSON.stringify({}),
     })
       .then((response) => response.blob())
       .then((blob) => {
@@ -120,7 +123,7 @@ const Cabecera = () => {
           <img src={logo} alt="" width={100} className="bg-white p-2 rounded" />
 
           <h1 className=" text-white  fw-bold fs-2 mt-3 ">
-            Gestión de recibos - We Supply
+            We Supply - Programación
           </h1>
           <div className="social-media order-lg-last  my-3">
             <span className="mb-0 d-flex">

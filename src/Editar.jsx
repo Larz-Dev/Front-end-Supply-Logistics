@@ -251,7 +251,7 @@ const Editar = ({ onClose, cargarPosts }) => {
       })
       .catch((error) => {
         Notificar(
-          "No se ha podico establecer conexión con el servidor",
+          "No se ha podido establecer conexión con el servidor",
           "error",
           "normal"
         );

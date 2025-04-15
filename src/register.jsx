@@ -1,174 +1,231 @@
-import { Link } from "react-router-dom";
+import { useState } from "react";
 import Swal from "sweetalert2";
 import Fondo from "./assets/images/fondo2.png";
-import { useState } from "react";
 import { variables } from "./funciones";
-const Register = () => {
+
+const RegisterConductor = () => {
   document.body.style.backgroundImage = `url(${Fondo})`;
   document.body.style.backgroundSize = "cover";
   document.body.style.backgroundRepeat = "no-repeat";
+
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState(null);
+
+  const [formData, setFormData] = useState({
+    documento: "",
+    Nombre1: "",
+    Nombre2: "",
+    Apellido1: "",
+    Apellido2: "",
+    email: "",
+    phone: "",
+    password: "",
+    transportadorasugerida: "",
+  });
 
   const handleImageChange = (e) => {
     setImage(e.target.files[0]);
     setPreview(URL.createObjectURL(e.target.files[0]));
   };
 
-  //Register
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
+    const form = new FormData();
 
-    const user = document.getElementById("username").value;
+    for (const key in formData) {
+      form.append(key, formData[key]);
+    }
 
-    const photo = document.getElementById("image").files[0];
+    if (image) form.append("photo", image);
 
-    const formData = new FormData();
-    formData.append("user", user);
-    formData.append("email", email);
-    formData.append("password", password);
-    formData.append("photo", photo);
-
-    fetch(variables("API")+"/usuario/create", {
-      method: "POST",
-      body: formData,
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.status == "success") {
-          Swal.fire({
-            position: "top-end",
-            icon: "success",
-            title: data.mensaje,
-            showConfirmButton: false,
-            timer: 1500,
-          });
-          setTimeout(() => {
-            window.location.href = "/";
-          }, "2000");
-        }
-        if (data.status != "success") {
-          Swal.fire({
-            position: "top-end",
-            icon: "error",
-            title: data.mensaje,
-            showConfirmButton: false,
-            timer: 1500,
-          });
-        }
-      })
-      .catch((data) => {
-        Swal.fire({
-          position: "top-end",
-          icon: "error",
-          title: "No se ha podido establecer conexión con el servidor",
-          showConfirmButton: false,
-          timer: 1500,
-        });
+    try {
+      const res = await fetch(variables("API") + "/conductor/create", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+        },
+        body: form,
       });
+
+      const data = await res.json();
+
+      Swal.fire({
+        position: "top-end",
+        icon: data.status === "success" ? "success" : "error",
+        title: data.mensaje,
+        showConfirmButton: false,
+        timer: 1500,
+      });
+
+      if (data.status === "success") {
+        setTimeout(() => {
+          window.location.href = "/";
+        }, 2000);
+      }
+    } catch (err) {
+      Swal.fire({
+        position: "top-end",
+        icon: "error",
+        title: "No se pudo conectar con el servidor",
+        showConfirmButton: false,
+        timer: 1500,
+      });
+    }
   };
 
   return (
-    <>
-      <div
-        className=" overflow-hidden d-flex justify-content-center align-items-center"
-
-      >
-        <div className="row d-flex justify-content-center">
+    <div className="overflow-hidden d-flex justify-content-center align-items-center">
+      <div className="row d-flex justify-content-center">
         <div className="col-12 text-center p-5">
-            <h1 className=" text-white fw-bold fs-1">BlogShare</h1>
+          <h1 className="text-white fw-bold fs-1">Registro de Conductores</h1>
+        </div>
+
+        <h1 className="text-white col-5 d-flex justify-content-center align-items-center">
+          <div className="col">
+            Registrate y gestione sus asignaciones fácilmente.
           </div>
-    
-       
+        </h1>
 
-          <h1 className="text-white col-5 d-flex justify-content-center align-items-center">
-            <div className="col">
-              {" "}
-              Regístrate y comparte tu opinión acerca de temas interesantes.
-            </div>
-          </h1>
+        <div className="card mt-3 col-5">
+          <div className="card-body">
+            <form onSubmit={handleSubmit} encType="multipart/form-data">
+              <h3 className="mb-3">Formulario de Registro</h3>
 
-          <div className="card mt-3 col-5" style={{ width: "23rem" }}>
-            <div className="card-body">
-              <form onSubmit={handleSubmit} encType="multipart/form-data">
-                <div className="form-group">
-                  <h1>Registro</h1>
-                  <label htmlFor="username">Usuario</label>
-                  <input type="text" className="form-control" id="username" />
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="email">Correo electrónico</label>
-                  <input type="email" className="form-control" id="email" />
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="password">Contraseña</label>
-                  <input
-                    type="password"
-                    className="form-control"
-                    id="password"
-                  />
-                </div>
-                <br />
-                <div className="form-group ">
-                  <label htmlFor="image">Imagen de perfil:⠀⠀⠀⠀⠀⠀⠀</label>
-                  <div className="image-upload">
-                    {preview ? (
-                      <img
-                        src={preview}
-                        alt="Preview"
-                        className="rounded-circle"
-                        style={{ width: "100px", height: "100px" }}
-                      />
-                    ) : (
-                      <div
-                        className="rounded-circle"
-                        style={{
-                          width: "100px",
-                          height: "100px",
-                          backgroundColor: "#ccc",
-                          display: "flex",
-                          justifyContent: "center",
-                          alignItems: "center",
-                        }}
-                      >
-                        <i
-                          className="fas fa-camera"
-                          style={{ fontSize: "24px" }}
-                        />
-                      </div>
-                    )}
+              <div className="row">
+                <div className="col">
+                  <div className="form-group mb-2">
+                    <label>Nombre</label>
                     <input
-                      type="file"
+                      type="text"
                       className="form-control"
-                      id="image"
-                      accept="image/*"
-                      onChange={handleImageChange}
+                      name="Nombre1"
+                      required
+                      onChange={handleChange}
+                    />
+                  </div>
+                  <div className="form-group mb-2">
+                    <label>Documento</label>
+                    <input
+                      type="number"
+                      className="form-control"
+                      name="documento"
+                      required
+                      onChange={handleChange}
+                    />
+                  </div>
+                  <div className="form-group mb-2">
+                    <label>Teléfono</label>
+                    <input
+                      type="number"
+                      className="form-control"
+                      name="phone"
+                      onChange={handleChange}
+                    />
+                  </div>
+
+                  <div className="form-group mb-2">
+                    <label>Correo electrónico</label>
+                    <input
+                      type="email"
+                      className="form-control"
+                      name="email"
+                      required
+                      onChange={handleChange}
                     />
                   </div>
                 </div>
 
-                <br />
+                <div className="col">
+                  <div className="form-group mb-2">
+                    <label>Apellido</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      name="Apellido1"
+                      required
+                      onChange={handleChange}
+                    />
+                  </div>
 
-                <div className="text-end">
-                  <a href="/" className="m-1 btn btn-dark">
-                    regresar
-                  </a>
-                  <button type="submit" className="m-1 btn btn-primary">
-                    Regístrate
-                  </button>
+                  <div className="form-group mb-2">
+                    <label>Contraseña</label>
+                    <input
+                      type="password"
+                      className="form-control"
+                      name="password"
+                      required
+                      onChange={handleChange}
+                    />
+                  </div>
+
+                  <div className="form-group mb-2">
+                    <label>Transportadora</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      name="transportadorasugerida"
+                      onChange={handleChange}
+                    />
+                  </div>
+
+                  <div className="form-group mb-4">
+                    <label>Foto de perfil (opcional)</label>
+                    <p> </p>
+                    <div className="d-flex align-items-center gap-3">
+                      <input
+                        type="file"
+                        className="form-control"
+                        accept="image/*"
+                        onChange={handleImageChange}
+                      />
+
+                      {preview ? (
+                        <img
+                          src={preview}
+                          className="rounded-circle"
+                          style={{ width: "80px", height: "80px" }}
+                          alt="preview"
+                        />
+                      ) : (
+                        <div
+                          className="rounded-circle"
+                          style={{
+                            backgroundColor: "#ccc",
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                          }}
+                        >
+                          <i
+                            className="fas fa-camera"
+                            style={{ fontSize: "20px" }}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
-              </form>
-            </div>
+              </div>
+
+              <div className="text-end">
+                <a href="/login" className="btn btn-secondary  me-2">
+                  Regresar
+                </a>
+                <button type="submit" className="btn btn-primary">
+                  Registrate
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 
-export default Register;
+export default RegisterConductor;

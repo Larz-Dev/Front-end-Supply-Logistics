@@ -8,7 +8,9 @@ import Servicios from "./servicios.jsx";
 import Vehiculos from "./vehiculos.jsx";
 import Empleados from "./empleados.jsx";
 import Usuarios from "./usuarios.jsx";
+import Conductores from "./conductores.jsx";
 import Nomina from "./nomina.jsx";
+import Myvehiculos from "./vehiculosconductor.jsx";
 function Database() {
   // Validate session (assuming this function does something important)
 
@@ -24,7 +26,6 @@ function Database() {
       <div className="row">
         <Cabecera></Cabecera>
 
-        
         <div className="col-md-3  d-flex flex-column p-3 bg-light">
           <Sidebar></Sidebar>
         </div>
@@ -36,14 +37,17 @@ function Database() {
           {base === "Empleados" && <Empleados />}
           {base === "Usuarios" && <Usuarios />}
           {base === "Nomina" && <Nomina />}
+          {base === "Conductores" && <Conductores />}
+          {base === "Misvehiculos" && <Myvehiculos />}
           {!base && (
             <div>
               <h1>Please select a database</h1>
               <Link to="/database?base=Transportadora">Transportadora</Link>
               <Link to="/database?base=Vehiculos">Vehiculos</Link>
               <Link to="/database?base=Servicios">Servicios</Link>
-              <Link to="/database?base=Usuarios">Servicios</Link>
-              <Link to="/database?base=Nomina">Servicios</Link>
+              <Link to="/database?base=Usuarios">Usuarios</Link>
+              <Link to="/database?base=Nomina">Nomina</Link>
+              <Link to="/database?base=Misvehiculos">Mis vehículos</Link>
             </div>
           )}
         </div>

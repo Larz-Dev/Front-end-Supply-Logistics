@@ -40,11 +40,23 @@ const Sidebar = () => {
   return (
     <div className="text-center ">
       <div className="d-flex flex-column mt-2">
-        <a href="/app" className="mb-2 border hover-b rounded-3 py-2">
-          Recibos <i className="fa-regular fa-pen-to-square"></i>
+        <a
+          href={sessionStorage.getItem("rol") > 3 ? "/appconductor" : "/app"}
+          className="mb-2 border hover-b rounded-3 py-2"
+        >
+          Programación <i className="fa-regular fa-pen-to-square"></i>
         </a>
       </div>
-
+      {sessionStorage.getItem("rol") > 3 && (
+        <div>
+          <a
+            href="/database?base=Misvehiculos"
+            className=" border hover-b rounded-3 d-flex flex-column "
+          >
+            Mis vehiculos <i className="fa fa-car"></i>
+          </a>
+        </div>
+      )}
       {sessionStorage.getItem("rol") == 1 && (
         <div>
           <h4 className="text-center ">Bases de Datos</h4>
@@ -67,13 +79,12 @@ const Sidebar = () => {
             style={{ maxHeight: maxHeight }} // Apply dynamic maxHeight
             ref={contentRef}
           >
-   <a
+            <a
               href="/database?base=Nomina"
               className="mb-2 border hover-b rounded-3 py-2"
             >
-              Nómina <i className="fa-solid fa-money-bill"></i> 
+              Nómina <i className="fa-solid fa-money-bill"></i>
             </a>
-
 
             <a
               href="/database?base=Vehiculos"
@@ -99,9 +110,17 @@ const Sidebar = () => {
             >
               Usuarios <i className="fa-solid fa-user"></i>
             </a>
+
+            <a
+              href="/database?base=Conductores"
+              className="mb-2 border hover-b rounded-3 py-2"
+            >
+              Conductores <i className="fa-solid fa-user"></i>
+            </a>
           </div>
         </div>
       )}
+
       {sessionStorage.getItem("rol") == 1 && (
         <div>
           <h4 className="text-center ">Gráficas</h4>
