@@ -223,7 +223,7 @@ const Consult = () => {
       if (response.ok) {
         const data = await response.json();
         //45703
-        const valoresExcluidos = ["45716", "45703", "45731", "45746"];
+        const valoresExcluidos = ["45716", "45703", "45731", "45746","45762"];
 
         const filteredData = data.map((item) =>
           valoresExcluidos.includes(item) ? "" : item
