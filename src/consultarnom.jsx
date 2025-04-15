@@ -223,7 +223,7 @@ const Consult = () => {
       if (response.ok) {
         const data = await response.json();
         //45703
-        const valoresExcluidos = ["45716", "45703", "45731", "45746","45762"];
+        const valoresExcluidos = ["45716", "45703", "45731", "45746", "45762"];
 
         const filteredData = data.map((item) =>
           valoresExcluidos.includes(item) ? "" : item
@@ -455,26 +455,20 @@ const Consult = () => {
     return "#5F7CD3"; // Noche
   };
 
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      const f = new Date(Date.now());
-      const stringfecha =
-        f.getDate() +
-        "/" +
-        (f.getMonth() + 1) +
-        "/" +
-        f.getFullYear() +
-        " " +
-        f.getHours() +
-        ":" +
-        f.getMinutes() +
-        ":" +
-        f.getSeconds();
-      setTiempoAhora(stringfecha);
-    }, 1000); // update every 1 second
-
-    return () => clearInterval(intervalId);
-  }, []);
+  const f = new Date(Date.now());
+  const stringfecha =
+    f.getDate() +
+    "/" +
+    (f.getMonth() + 1) +
+    "/" +
+    f.getFullYear() +
+    " " +
+    f.getHours() +
+    ":" +
+    f.getMinutes() +
+    ":" +
+    f.getSeconds();
+  setTiempoAhora(stringfecha);
 
   return (
     <div className="">
@@ -514,7 +508,7 @@ const Consult = () => {
             } mx-2 my-1 fw-bold fs-3`}
             onClick={() => setMostrarVentana1(false)}
           >
-           Consultar dias y horas trabajadas
+            Consultar dias y horas trabajadas
           </button>
         </div>
       </div>
@@ -742,7 +736,9 @@ const Consult = () => {
         {!mostrarVentana1 && (
           <div className="ventana2 p-3 border rounded bg-light">
             <div className="text-center">
-              <h2 className="text-center fw-bold">Consultar dias y horas trabajadas</h2>
+              <h2 className="text-center fw-bold">
+                Consultar dias y horas trabajadas
+              </h2>
 
               <div className="row mx-auto">
                 <div className="col-sm-4 p-4">
@@ -878,7 +874,9 @@ const Consult = () => {
                                 color: "#000",
                               }}
                             >
-                              <span className="bg-black bg-opacity-25 rounded-3 p-1 ">{item.Hora_entrada}</span>
+                              <span className="bg-black bg-opacity-25 rounded-3 p-1 ">
+                                {item.Hora_entrada}
+                              </span>
                             </td>
                             <td
                               className=" text-white align-content-center"
@@ -889,7 +887,9 @@ const Consult = () => {
                                 color: "#000",
                               }}
                             >
-                                  <span className="bg-black bg-opacity-25 rounded-3 p-1">{item.Hora_salida}</span>
+                              <span className="bg-black bg-opacity-25 rounded-3 p-1">
+                                {item.Hora_salida}
+                              </span>
                             </td>
                             <td
                               className=" text-white align-content-center"
@@ -900,7 +900,10 @@ const Consult = () => {
                                 color: "#fff",
                               }}
                             >
-                                <span className="bg-black bg-opacity-25 rounded-3 p-1"> {item.Horas_jornada}</span> 
+                              <span className="bg-black bg-opacity-25 rounded-3 p-1">
+                                {" "}
+                                {item.Horas_jornada}
+                              </span>
                             </td>
                             <td>{item.Tipo_turno.trim()}</td>
                             <td>{item.Hora_diurna_ordinaria.trim()}</td>
