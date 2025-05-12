@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Cerrarsesion, variables, Validarsesion } from "./funciones";
 import loadingProfile from "./assets/images/ProfileLoading.gif";
-import logo from "./assets/images/Logo.png";
 
 const Cabecera = () => {
   const [profileImage, setProfileImage] = useState(null);
@@ -115,19 +114,11 @@ const Cabecera = () => {
 
   return (
     <>
-      <nav
-        className="navbar   shadow bg-supply navbar-expand-lg ftco_navbar ftco-navbar-light"
-        id="ftco-navbar"
-      >
-        <div className="container  text-star my-3">
-          <img src={logo} alt="" width={100} className="bg-white p-2 rounded" />
-
-          <h1 className=" text-white  fw-bold fs-2 mt-3 ">
-            We Supply - Programación
-          </h1>
-          <div className="social-media order-lg-last  my-3">
+      <nav className=" navbar p-0 m-0 mt-auto ">
+        <div className="  text-star ">
+          <div className="social-media order-lg-last  ">
             <span className="mb-0 d-flex">
-              <div className="dropdown bg-white rounded-3 ">
+              <div className="dropup  bg-white rounded-3 ">
                 <button
                   className="btn "
                   type="button"
@@ -146,18 +137,21 @@ const Cabecera = () => {
 
                   <small className=" opacity-50 m-2 ">{timer}</small>
                 </button>
-                <ul className="dropdown-menu ">
+                <ul className="dropdown-menu  ">
                   <li className="text-center"> </li>
                   <li className="text-center m-2">
-                    <span className="fw-light p-3">
+                    <p className="fw-light ">
                       {sessionStorage.getItem("documento")}
-                    </span>
-                    <span className="fw-light p-3">
+                    </p>
+                    <p className="fw-light">
                       {sessionStorage.getItem("email")}
-                    </span>
+                    </p>
+
+                    <p className="fw-light ">
+                      {sessionStorage.getItem("transportadora")}
+                    </p>
                   </li>
                   <li className="text-center">
-                    {" "}
                     <button
                       className="btn btn-danger"
                       onClick={() => Cerrarsesion()}

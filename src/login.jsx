@@ -61,14 +61,21 @@ const Login = () => {
         sessionStorage.setItem("Nombre1", data.conductor.Nombre1);
         sessionStorage.setItem("Nombre2", data.conductor.Nombre2);
         sessionStorage.setItem("phone", data.conductor.phone);
-        // Store additional variables
+        sessionStorage.setItem("pinTemporal", data.pin);
 
+        // Store additional variables
+        console.log(data);
         sessionStorage.setItem("documento", data.conductor.documento);
         sessionStorage.setItem("estado", data.conductor.estado);
         sessionStorage.setItem("idConductor", data.conductor.idConductor);
         sessionStorage.setItem(
           "idTransportadora",
           data.conductor.idTransportadora
+        );
+        sessionStorage.setItem(
+          "transportadora",
+          data.conductor.transportadora?.nombre ||
+            data.conductor.transportadorasugerida + "(Por confirmar)"
         );
 
         window.location.href = "/appconductor";
@@ -87,9 +94,16 @@ const Login = () => {
   };
 
   // Fondo
-  document.body.style.backgroundImage = `url(${Fondo})`;
-  document.body.style.backgroundSize = "cover";
-  document.body.style.backgroundRepeat = "no-repeat";
+
+
+   document.body.style.backgroundImage = `url(${Fondo})`;
+    document.body.style.backgroundSize = "cover";
+    document.body.style.backgroundRepeat = "no-repeat";
+    document.body.style.backgroundPosition = "center";
+    document.body.style.backgroundAttachment = "fixed";
+    document.body.style.height = "100vh";
+    document.body.style.margin = "0";
+
 
   return (
     <div

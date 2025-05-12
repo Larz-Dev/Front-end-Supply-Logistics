@@ -61,7 +61,7 @@ const CrearProgramacion = ({ onCreated }) => {
             fechaSalida,
             fechaEstimadaLlegada,
             contacto,
-            estado: "En curso",
+            estado: 0,
             observaciones,
           }),
         }
@@ -90,11 +90,13 @@ const CrearProgramacion = ({ onCreated }) => {
   return (
     <>
       <button
-        className="flotante position-fixed bg-supply m-4"
+        className="fw-bold text-white btn btn-success col-md-2 mx-auto"
         data-bs-toggle="modal"
         data-bs-target="#modalProgramacion"
       >
-        <i className="fa-solid fa-plus"></i>
+
+   Generar solicitud
+ 
       </button>
 
       <div
@@ -106,7 +108,8 @@ const CrearProgramacion = ({ onCreated }) => {
         <div className="modal-dialog modal-lg">
           <div className="modal-content bg-transparent border-0">
             <div className="rounded-3 fondo2 p-2 my-3 p-3">
-              <h2 className="text-white">Crear Programación</h2>
+              <h2 className="text-white">Enviar Solicitud</h2>
+              <div className=" fs-4 p-3  m-3 bg-body rounded-2">Al enviar una solicitud, esta le será notificada al sistema para comprobar la disponibilidad de recuros para aternderlo adecuadamente.</div>
               <form onSubmit={handleSubmit}>
                 <div className="row px-3 text-center">
                   <div className="col-md-6 p-2">

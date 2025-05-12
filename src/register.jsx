@@ -1,15 +1,19 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Swal from "sweetalert2";
 import Fondo from "./assets/images/fondo2.png";
 import { variables } from "./funciones";
+import logo from "./assets/images/Logo.png";
 
 const RegisterConductor = () => {
-  document.body.style.backgroundImage = `url(${Fondo})`;
-  document.body.style.backgroundSize = "cover";
-  document.body.style.backgroundRepeat = "no-repeat";
-
-  const [image, setImage] = useState(null);
-  const [preview, setPreview] = useState(null);
+  useEffect(() => {
+    document.body.style.backgroundImage = `url(${Fondo})`;
+    document.body.style.backgroundSize = "cover";
+    document.body.style.backgroundRepeat = "no-repeat";
+    document.body.style.backgroundPosition = "center";
+    document.body.style.backgroundAttachment = "fixed";
+    document.body.style.height = "100vh";
+    document.body.style.margin = "0";
+  }, []);
 
   const [formData, setFormData] = useState({
     documento: "",
@@ -20,13 +24,9 @@ const RegisterConductor = () => {
     email: "",
     phone: "",
     password: "",
+    confirmPassword: "",
     transportadorasugerida: "",
   });
-
-  const handleImageChange = (e) => {
-    setImage(e.target.files[0]);
-    setPreview(URL.createObjectURL(e.target.files[0]));
-  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -35,13 +35,39 @@ const RegisterConductor = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    const form = new FormData();
 
+    // Validación de número de documento y contraseñas
+    if (formData.documento.length < 7) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "El número de documento debe tener al menos 7 dígitos.",
+      });
+      return;
+    }
+
+    if (formData.password.length < 8) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "La contraseña debe tener al menos 8 caracteres.",
+      });
+      return;
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Las contraseñas no coinciden.",
+      });
+      return;
+    }
+
+    const form = new FormData();
     for (const key in formData) {
       form.append(key, formData[key]);
     }
-
-    if (image) form.append("photo", image);
 
     try {
       const res = await fetch(variables("API") + "/conductor/create", {
@@ -54,18 +80,52 @@ const RegisterConductor = () => {
 
       const data = await res.json();
 
-      Swal.fire({
-        position: "top-end",
-        icon: data.status === "success" ? "success" : "error",
-        title: data.mensaje,
-        showConfirmButton: false,
-        timer: 1500,
-      });
-
       if (data.status === "success") {
-        setTimeout(() => {
-          window.location.href = "/";
-        }, 2000);
+        Swal.fire({
+          title: "¡Registro exitoso!",
+          text: "¡Bienvenido! ¿Cómo prefieres continuar?",
+          icon: "success",
+          showCancelButton: true,
+          confirmButtonText: "Sitio Web",
+          cancelButtonText: "Bot de WhatsApp",
+          confirmButtonColor: "#3085d6",
+          cancelButtonColor: "#25D366",
+          html: `   <div class="text-center" style="display: flex; justify-content: space-between; align-items: center;">
+  <p class="mt-2 mb-0 p-2 justificar my-1 fw-bold" style="flex: 1;">Si deseas acceder a la plataforma con mayor visibilidad y comodidad, puedes hacerlo desde la página web.</p>
+  <p class="mt-2 mb-0 p-2 justificar my-1 fw-bold" style="flex: 1;">Si prefieres un proceso más rápido y directo, puedes continuar a través de nuestro chatbot en WhatsApp.</p>
+</div> `,
+        }).then((result) => {
+          if (result.isConfirmed) {
+            window.location.href = "/login";
+          } else if (result.dismiss === Swal.DismissReason.cancel) {
+            window.open(
+              "https://wa.me/573012500115?text=Hola%20deseo%20empezar%20a%20usar%20la%20aplicaci%C3%B3n,%20por%20qu%C3%A9%20deber%C3%ADa%20comenzar?",
+              "_blank"
+            );
+          }
+
+          // Limpiar los campos después de la acción de la alerta
+          setFormData({
+            documento: "",
+            Nombre1: "",
+            Nombre2: "",
+            Apellido1: "",
+            Apellido2: "",
+            email: "",
+            phone: "",
+            password: "",
+            confirmPassword: "",
+            transportadorasugerida: "",
+          });
+        });
+      } else {
+        Swal.fire({
+          position: "top-end",
+          icon: "error",
+          title: data.mensaje,
+          showConfirmButton: false,
+          timer: 1500,
+        });
       }
     } catch (err) {
       Swal.fire({
@@ -79,146 +139,141 @@ const RegisterConductor = () => {
   };
 
   return (
-    <div className="overflow-hidden d-flex justify-content-center align-items-center">
-      <div className="row d-flex justify-content-center">
-        <div className="col-12 text-center p-5">
-          <h1 className="text-white fw-bold fs-1">Registro de Conductores</h1>
+    <div className="container-fluid p-0">
+      <div className="row g-0">
+        <div
+          className="col-md-6 d-flex flex-column align-items-center text-white order-1 order-md-0 bg-body"
+          style={{ minHeight: "100vh" }}
+        >
+          <div className="mt-auto mb-auto text-center px-4">
+            <img
+              src={logo}
+              alt="Logo"
+              className="mb-1 bg- border-2 border p-2 rounded"
+              style={{ width: "200px" }}
+            />
+            <h1 className="fw-bold text-dark">We Supply APP</h1>
+            <div className="border-bottom"></div>
+            <p className="fs-2 fw-bold text-dark">
+              Regístrate y gestiona tus viajes y programaciones de forma
+              sencilla.
+            </p>
+          </div>
         </div>
 
-        <h1 className="text-white col-5 d-flex justify-content-center align-items-center">
-          <div className="col">
-            Registrate y gestione sus asignaciones fácilmente.
-          </div>
-        </h1>
-
-        <div className="card mt-3 col-5">
-          <div className="card-body">
+        <div className="col-md-6 d-flex justify-content-center align-items-center order-0 order-md-1">
+          <div
+            className="bg-white p-3 rounded shadow-lg w-100 mx-3 my-5"
+            style={{ maxWidth: "500px" }}
+          >
+            <h3 className="mb-2 text-center">Formulario de Registro</h3>
             <form onSubmit={handleSubmit} encType="multipart/form-data">
-              <h3 className="mb-3">Formulario de Registro</h3>
-
-              <div className="row">
-                <div className="col">
-                  <div className="form-group mb-2">
-                    <label>Nombre</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      name="Nombre1"
-                      required
-                      onChange={handleChange}
-                    />
-                  </div>
-                  <div className="form-group mb-2">
-                    <label>Documento</label>
-                    <input
-                      type="number"
-                      className="form-control"
-                      name="documento"
-                      required
-                      onChange={handleChange}
-                    />
-                  </div>
-                  <div className="form-group mb-2">
-                    <label>Teléfono</label>
-                    <input
-                      type="number"
-                      className="form-control"
-                      name="phone"
-                      onChange={handleChange}
-                    />
-                  </div>
-
-                  <div className="form-group mb-2">
-                    <label>Correo electrónico</label>
-                    <input
-                      type="email"
-                      className="form-control"
-                      name="email"
-                      required
-                      onChange={handleChange}
-                    />
-                  </div>
-                </div>
-
-                <div className="col">
-                  <div className="form-group mb-2">
-                    <label>Apellido</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      name="Apellido1"
-                      required
-                      onChange={handleChange}
-                    />
-                  </div>
-
-                  <div className="form-group mb-2">
-                    <label>Contraseña</label>
-                    <input
-                      type="password"
-                      className="form-control"
-                      name="password"
-                      required
-                      onChange={handleChange}
-                    />
-                  </div>
-
-                  <div className="form-group mb-2">
-                    <label>Transportadora</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      name="transportadorasugerida"
-                      onChange={handleChange}
-                    />
-                  </div>
-
-                  <div className="form-group mb-4">
-                    <label>Foto de perfil (opcional)</label>
-                    <p> </p>
-                    <div className="d-flex align-items-center gap-3">
-                      <input
-                        type="file"
-                        className="form-control"
-                        accept="image/*"
-                        onChange={handleImageChange}
-                      />
-
-                      {preview ? (
-                        <img
-                          src={preview}
-                          className="rounded-circle"
-                          style={{ width: "80px", height: "80px" }}
-                          alt="preview"
-                        />
-                      ) : (
-                        <div
-                          className="rounded-circle"
-                          style={{
-                            backgroundColor: "#ccc",
-                            display: "flex",
-                            justifyContent: "center",
-                            alignItems: "center",
-                          }}
-                        >
-                          <i
-                            className="fas fa-camera"
-                            style={{ fontSize: "20px" }}
-                          />
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
+              <div className="mb-1">
+                <label className="form-label">Nombre</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  name="Nombre1"
+                  value={formData.Nombre1}
+                  required
+                  onChange={handleChange}
+                />
               </div>
-
-              <div className="text-end">
-                <a href="/login" className="btn btn-secondary  me-2">
+              <div className="mb-1">
+                <label className="form-label">Apellido</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  name="Apellido1"
+                  value={formData.Apellido1}
+                  required
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="mb-1">
+                <label className="form-label">Documento</label>
+                <input
+                  type="number"
+                  className="form-control"
+                  name="documento"
+                  value={formData.documento}
+                  required
+                  onChange={handleChange}
+                  minLength="7"
+                />
+              </div>
+              <div className="mb-1">
+                <label className="form-label">Correo electrónico</label>
+                <input
+                  type="email"
+                  className="form-control"
+                  name="email"
+                  value={formData.email}
+                  required
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="mb-1">
+                <label className="form-label">Teléfono</label>
+                <input
+                  type="number"
+                  className="form-control"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="mb-1">
+                <label className="form-label">Contraseña</label>
+                <input
+                  type="password"
+                  className="form-control"
+                  name="password"
+                  value={formData.password}
+                  required
+                  onChange={handleChange}
+                  minLength="8"
+                />
+              </div>
+              <div className="mb-1">
+                <label className="form-label">Confirmar Contraseña</label>
+                <input
+                  type="password"
+                  className="form-control"
+                  name="confirmPassword"
+                  value={formData.confirmPassword}
+                  required
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="mb-1">
+                <label className="form-label">Transportadora</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  name="transportadorasugerida"
+                  value={formData.transportadorasugerida}
+                  onChange={handleChange}
+                />
+              </div><p></p>
+              <div className="d-flex justify-content-between gap-2 mb-3">
+                <a href="/login" className="btn btn-secondary w-50">
                   Regresar
                 </a>
-                <button type="submit" className="btn btn-primary">
-                  Registrate
+                <button type="submit" className="btn btn-primary w-50">
+                  Registrarse
                 </button>
+              </div>
+              <div className="d-grid">
+                <a
+                  href="https://wa.me/573012500115?text=Hola%20deseo%20empezar%20a%20usar%20la%20aplicaci%C3%B3n,%20por%20qu%C3%A9%20deber%C3%ADa%20comenzar?"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-success"
+                >
+                  <i className="fab fa-whatsapp me-2"></i> Contactar por
+                  WhatsApp
+                </a>
               </div>
             </form>
           </div>

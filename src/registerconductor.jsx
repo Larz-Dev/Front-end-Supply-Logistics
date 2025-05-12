@@ -1,4 +1,3 @@
-// RegisterConductor.jsx
 import React, { useState } from "react";
 import { variables, Notificar } from "./funciones.jsx";
 
@@ -15,16 +14,19 @@ const RegisterConductor = () => {
     password: "",
   });
 
-  const [photo, setPhoto] = useState(null);
+  // const [photo, setPhoto] = useState(null); // Comentado: ya no se usará la foto
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  /*
+  // Comentado: ya no se usa la carga de foto
   const handlePhotoChange = (e) => {
     setPhoto(e.target.files[0]);
   };
+  */
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -33,7 +35,8 @@ const RegisterConductor = () => {
     Object.entries(formData).forEach(([key, val]) => {
       body.append(key, val);
     });
-    if (photo) body.append("photo", photo);
+
+    // if (photo) body.append("photo", photo); // Comentado: no se sube la foto
 
     try {
       const res = await fetch(variables("API") + "/conductor/crear", {
@@ -58,7 +61,10 @@ const RegisterConductor = () => {
           idTransportadora: "",
           password: "",
         });
-        setPhoto(null);
+        // setPhoto(null); // Comentado: no hay foto que limpiar
+
+        const modal = new bootstrap.Modal(document.getElementById("registroExitosoModal"));
+        modal.show();
       } else {
         Notificar(data.mensaje, "error", "normal");
       }
@@ -112,17 +118,60 @@ const RegisterConductor = () => {
                 <label>Transportadora (ID)</label>
                 <input type="number" name="idTransportadora" className="form-control" required value={formData.idTransportadora} onChange={handleChange} />
               </div>
+
+              {/* Comentado: campo de foto ya no es necesario */}
+              {/*
               <div className="col-md-6 mb-3">
                 <label>Foto del conductor</label>
                 <input type="file" name="photo" className="form-control" accept="image/*" onChange={handlePhotoChange} />
               </div>
+              */}
             </div>
             <div className="text-end">
               <button type="submit" className="btn btn-success">
                 Registrar conductor
               </button>
             </div>
+              <a
+                href="https://wa.me/573001112223?text=Hola,%20me%20acabo%20de%20registrar%20como%20conductor"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-success"
+              >
+                
+                Contactar por WhatsApp
+                    <i className="fa-solid fa-whatsapp"></i>
+              </a>
           </form>
+        </div>
+      </div>
+
+      {/* Modal de confirmación */}
+      <div className="modal fade" id="registroExitosoModal" tabIndex="-1" aria-labelledby="registroExitosoLabel" aria-hidden="true">
+        <div className="modal-dialog modal-dialog-centered">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title" id="registroExitosoLabel">Registro exitoso</h5>
+              <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div className="modal-body">
+              El conductor fue registrado exitosamente. ¿Qué deseas hacer ahora?
+            </div>
+            <div className="modal-footer">
+             
+              <a
+                href="https://wa.me/573001112223?text=Hola,%20me%20acabo%20de%20registrar%20como%20conductor"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-success"
+              >
+                
+                Contactar por WhatsApp
+                    <i className="fa-solid fa-whatsapp"></i>
+              </a>
+              <a href="/login" className="btn btn-primary">Ir a Login</a>
+            </div>
+          </div>
         </div>
       </div>
     </div>

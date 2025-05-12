@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import "./Sidebar.css";
+import logo from "./assets/images/Logo.png";
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -38,7 +39,19 @@ const Sidebar = () => {
   }, [isOpen2]);
 
   return (
-    <div className="text-center ">
+    <div className="text-center   ">
+      <div className="pt-3 bg-supply p-0 m-0 rounded-bottom-4">
+        <div className="d-flex align-items-center gap-3 p-2">
+          <img
+            src={logo}
+            alt=""
+            width={80}
+            className="bg-white p-2 img-responsive rounded"
+          />
+          <h1 className="text-white fw-bold fs-2 m-0">We Supply APP</h1>
+        </div>
+      </div>
+
       <div className="d-flex flex-column mt-2">
         <a
           href={sessionStorage.getItem("rol") > 3 ? "/appconductor" : "/app"}
@@ -51,9 +64,9 @@ const Sidebar = () => {
         <div>
           <a
             href="/database?base=Misvehiculos"
-            className=" border hover-b rounded-3 d-flex flex-column "
+            className=" border hover-b rounded-3 d-flex flex-column pb-1"
           >
-            Mis vehiculos <i className="fa fa-car"></i>
+            Mis vehículos <i className="fa fa-car"></i>
           </a>
         </div>
       )}
