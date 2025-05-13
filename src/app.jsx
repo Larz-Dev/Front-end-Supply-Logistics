@@ -438,8 +438,18 @@ function App() {
                                           }`}
                                         >
                                           {programacion.fechaAsignada
-                                            ? `Asignada: ${programacion.fechaAsignada}`
-                                            : `Estimada: ${programacion.fechaEstimadaLlegada}`}
+                                            ? `Asignada: ${new Date(
+                                                programacion.fechaAsignada
+                                              )
+                                                .toISOString()
+                                                .slice(0, 16)
+                                                .replace("T", " ")}`
+                                            : `Estimada: ${new Date(
+                                                programacion.fechaEstimadaLlegada
+                                              )
+                                                .toISOString()
+                                                .slice(0, 16)
+                                                .replace("T", " ")}`}
                                         </span>
                                       </td>
                                       <td>
@@ -497,7 +507,12 @@ function App() {
                                                       Asignado para:
                                                     </strong>
                                                     <br />
-                                                    {programacion.fechaAsignada}
+                                                    {new Date(
+                                                      programacion.fechaAsignada
+                                                    )
+                                                      .toISOString()
+                                                      .slice(0, 16)
+                                                      .replace("T", " ")}
                                                   </p>
                                                 )}
                                                 {programacion.fechaInicioServicio && (
@@ -506,9 +521,12 @@ function App() {
                                                       Inicio de servicio:
                                                     </strong>
                                                     <br />
-                                                    {
+                                                    {new Date(
                                                       programacion.fechaInicioServicio
-                                                    }
+                                                    )
+                                                      .toISOString()
+                                                      .slice(0, 16)
+                                                      .replace("T", " ")}
                                                   </p>
                                                 )}
                                                 {programacion.fechaFinServicio && (
@@ -517,9 +535,12 @@ function App() {
                                                       Fin de servicio:
                                                     </strong>
                                                     <br />
-                                                    {
+                                                    {new Date(
                                                       programacion.fechaFinServicio
-                                                    }
+                                                    )
+                                                      .toISOString()
+                                                      .slice(0, 16)
+                                                      .replace("T", " ")}
                                                   </p>
                                                 )}
                                               </div>
@@ -619,7 +640,7 @@ function App() {
                                                 !programacion.fechaInicioServicio &&
                                                 programacion.estado !== 3 && (
                                                   <>
-                                                    {programacion.estado ==
+                                                    {programacion.estado ===
                                                       0 && (
                                                       <a
                                                         className="btn btn-primary fw-bold text-white me-2 mb-2"
@@ -878,11 +899,17 @@ function App() {
                           <>
                             <p className="card-text mb-1">
                               <strong>Inicio de servicio:</strong>{" "}
-                              {selectedprogramm.fechaInicioServicio}
+                              {new Date(selectedprogramm.fechaInicioServicio)
+                                .toISOString()
+                                .slice(0, 16)
+                                .replace("T", " ")}
                             </p>
                             <p className="card-text mb-1">
                               <strong>Fin de servicio:</strong>{" "}
-                              {selectedprogramm.fechaFinServicio}
+                              {new Date(selectedprogramm.fechaFinServicio)
+                                .toISOString()
+                                .slice(0, 16)
+                                .replace("T", " ")}
                             </p>
                           </>
                         )}
