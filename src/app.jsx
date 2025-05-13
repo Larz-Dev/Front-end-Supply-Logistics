@@ -705,7 +705,7 @@ function App() {
                     )
                   )}
                   <div className=" text-white fs-3 fw-bold  text-center bg-dark">
-                    <div className="btn rounded-0 p-0 bg-supply d-block p-1">
+                    <div className="btn rounded-0 p-0 bg-supply d-block pt-1">
                       {" "}
                     </div>
                   </div>

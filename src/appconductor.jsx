@@ -696,7 +696,7 @@ function App() {
                         )
                       )}
                       <div className=" text-white fs-3 fw-bold  text-center bg-dark">
-                        <div className="btn rounded-0 p-0 bg-supply d-block p-1">
+                        <div className="btn rounded-0 p-0 bg-supply d-block pt-1">
                           {" "}
                         </div>
                       </div>
@@ -861,10 +861,12 @@ function App() {
                       ) : (
                         <p className="card-text mb-1">
                           <strong>Fecha estimada:</strong>{" "}
-                          {new Date(selectedprogramm.fechaEstimadaLlegada)
-                            .toISOString()
-                            .slice(0, 16)
-                            .replace("T", " ")}
+                          {selectedprogramm.fechaEstimadaLlegada
+                            ? new Date(selectedprogramm.fechaEstimadaLlegada)
+                                .toISOString()
+                                .slice(0, 16)
+                                .replace("T", " ")
+                            : "Sin fecha estimada"}
                         </p>
                       )}
 
@@ -890,10 +892,12 @@ function App() {
                     </div>
                     <div className="card-footer text-muted">
                       Programado el{" "}
-                      {new Date(selectedprogramm.createdAt)
-                        .toISOString()
-                        .slice(0, 16)
-                        .replace("T", " ")}
+                      {selectedprogramm.createdAt
+                        ? new Date(selectedprogramm.createdAt)
+                            .toISOString()
+                            .slice(0, 16)
+                            .replace("T", " ")
+                        : "Sin fecha estimada"}
                     </div>
                     {selectedprogramm.observaciones && (
                       <div className="card-footer text-muted">
@@ -1152,10 +1156,12 @@ function App() {
                         <div className="bg-success text-white p-2 rounded mb-2">
                           <p className="card-text mb-1">
                             <strong>Fecha asignada:</strong>{" "}
-                            {new Date(selectedprogramm.fechaAsignada)
-                              .toISOString()
-                              .slice(0, 16)
-                              .replace("T", " ")}
+                            {selectedprogramm.fechaAsignada
+                              ? new Date(selectedprogramm.fechaAsignada)
+                                  .toISOString()
+                                  .slice(0, 16)
+                                  .replace("T", " ")
+                              : "Sin fecha estimada"}
                           </p>
                           <p className="card-text mb-1">
                             <strong>Área asignada:</strong>{" "}
@@ -1165,10 +1171,12 @@ function App() {
                       ) : (
                         <p className="card-text mb-1">
                           <strong>Fecha estimada:</strong>{" "}
-                          {new Date(selectedprogramm.fechaEstimadaLlegada)
-                            .toISOString()
-                            .slice(0, 16)
-                            .replace("T", " ")}
+                          {selectedprogramm.fechaEstimadaLlegada
+                            ? new Date(selectedprogramm.fechaEstimadaLlegada)
+                                .toISOString()
+                                .slice(0, 16)
+                                .replace("T", " ")
+                            : "Sin fecha estimada"}
                         </p>
                       )}
 
@@ -1194,10 +1202,12 @@ function App() {
                     </div>
                     <div className="card-footer text-muted">
                       Programado el{" "}
-                      {new Date(selectedprogramm.createdAt)
-                        .toISOString()
-                        .slice(0, 16)
-                        .replace("T", " ")}
+                       {selectedprogramm.createdAt
+                            ? new Date(selectedprogramm.createdAt)
+                                .toISOString()
+                                .slice(0, 16)
+                                .replace("T", " ")
+                            : "Sin fecha estimada"}
                     </div>
                     {selectedprogramm.observaciones && (
                       <div className="card-footer text-muted">
