@@ -438,26 +438,8 @@ function App() {
                                           }`}
                                         >
                                           {programacion.fechaAsignada
-                                            ? `Asignada: ${new Date(
-                                                programacion.fechaAsignada
-                                              ).toLocaleString("es-CO", {
-                                                year: "numeric",
-                                                month: "2-digit",
-                                                day: "2-digit",
-                                                hour: "2-digit",
-                                                minute: "2-digit",
-                                                hour12: false,
-                                              })}`
-                                            : `Estimada: ${new Date(
-                                                programacion.fechaEstimadaLlegada
-                                              ).toLocaleString("es-CO", {
-                                                year: "numeric",
-                                                month: "2-digit",
-                                                day: "2-digit",
-                                                hour: "2-digit",
-                                                minute: "2-digit",
-                                                hour12: false,
-                                              })}`}
+                                            ? `Asignada: ${programacion.fechaAsignada}`
+                                            : `Estimada: ${programacion.fechaEstimadaLlegada}`}
                                         </span>
                                       </td>
                                       <td>
@@ -515,16 +497,7 @@ function App() {
                                                       Asignado para:
                                                     </strong>
                                                     <br />
-                                                    {new Date(
-                                                      programacion.fechaAsignada
-                                                    ).toLocaleString("es-CO", {
-                                                      year: "numeric",
-                                                      month: "2-digit",
-                                                      day: "2-digit",
-                                                      hour: "2-digit",
-                                                      minute: "2-digit",
-                                                      hour12: false,
-                                                    })}
+                                                    {programacion.fechaAsignada}
                                                   </p>
                                                 )}
                                                 {programacion.fechaInicioServicio && (
@@ -533,16 +506,9 @@ function App() {
                                                       Inicio de servicio:
                                                     </strong>
                                                     <br />
-                                                    {new Date(
+                                                    {
                                                       programacion.fechaInicioServicio
-                                                    ).toLocaleString("es-CO", {
-                                                      year: "numeric",
-                                                      month: "2-digit",
-                                                      day: "2-digit",
-                                                      hour: "2-digit",
-                                                      minute: "2-digit",
-                                                      hour12: false,
-                                                    })}
+                                                    }
                                                   </p>
                                                 )}
                                                 {programacion.fechaFinServicio && (
@@ -551,16 +517,9 @@ function App() {
                                                       Fin de servicio:
                                                     </strong>
                                                     <br />
-                                                    {new Date(
+                                                    {
                                                       programacion.fechaFinServicio
-                                                    ).toLocaleString("es-CO", {
-                                                      year: "numeric",
-                                                      month: "2-digit",
-                                                      day: "2-digit",
-                                                      hour: "2-digit",
-                                                      minute: "2-digit",
-                                                      hour12: false,
-                                                    })}
+                                                    }
                                                   </p>
                                                 )}
                                               </div>
@@ -919,29 +878,11 @@ function App() {
                           <>
                             <p className="card-text mb-1">
                               <strong>Inicio de servicio:</strong>{" "}
-                              {new Date(
-                                selectedprogramm.fechaInicioServicio
-                              ).toLocaleString("es-CO", {
-                                year: "numeric",
-                                month: "2-digit",
-                                day: "2-digit",
-                                hour: "2-digit",
-                                minute: "2-digit",
-                                hour12: false,
-                              })}
+                              {selectedprogramm.fechaInicioServicio}
                             </p>
                             <p className="card-text mb-1">
                               <strong>Fin de servicio:</strong>{" "}
-                              {new Date(
-                                selectedprogramm.fechaFinServicio
-                              ).toLocaleString("es-CO", {
-                                year: "numeric",
-                                month: "2-digit",
-                                day: "2-digit",
-                                hour: "2-digit",
-                                minute: "2-digit",
-                                hour12: false,
-                              })}
+                              {selectedprogramm.fechaFinServicio}
                             </p>
                           </>
                         )}
