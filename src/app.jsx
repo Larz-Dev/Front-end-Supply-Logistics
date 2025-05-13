@@ -363,7 +363,9 @@ function App() {
                 id="inicio"
                 value={rangoInicio}
                 onChange={(event) => {
-               setCurrentPage(1),   setTodo(false), setRangoInicio(event.target.value);
+                  setCurrentPage(1),
+                    setTodo(false),
+                    setRangoInicio(event.target.value);
                 }}
               />
               <span className="mx-3"> {"y"}</span>
@@ -375,7 +377,9 @@ function App() {
                 id="fin"
                 value={rangoFin}
                 onChange={(event) => {
-                    setCurrentPage(1),  setTodo(false), setRangoFin(event.target.value);
+                  setCurrentPage(1),
+                    setTodo(false),
+                    setRangoFin(event.target.value);
                 }}
               />
             </div>
@@ -436,10 +440,10 @@ function App() {
                                           {programacion.fechaAsignada
                                             ? `Asignada: ${new Date(
                                                 programacion.fechaAsignada
-                                              ).toLocaleString()}`
+                                              ).toLocaleString("es-CO")}`
                                             : `Estimada: ${new Date(
                                                 programacion.fechaEstimadaLlegada
-                                              ).toLocaleString()}`}
+                                              ).toLocaleString("es-CO")}`}
                                         </span>
                                       </td>
                                       <td>
@@ -499,7 +503,7 @@ function App() {
                                                     <br />
                                                     {new Date(
                                                       programacion.fechaAsignada
-                                                    ).toLocaleString()}
+                                                    ).toLocaleString("es-CO")}
                                                   </p>
                                                 )}
                                                 {programacion.fechaInicioServicio && (
@@ -510,7 +514,7 @@ function App() {
                                                     <br />
                                                     {new Date(
                                                       programacion.fechaInicioServicio
-                                                    ).toLocaleString()}
+                                                    ).toLocaleString("es-CO")}
                                                   </p>
                                                 )}
                                                 {programacion.fechaFinServicio && (
@@ -521,7 +525,7 @@ function App() {
                                                     <br />
                                                     {new Date(
                                                       programacion.fechaFinServicio
-                                                    ).toLocaleString()}
+                                                    ).toLocaleString("es-CO")}
                                                   </p>
                                                 )}
                                               </div>
@@ -621,7 +625,7 @@ function App() {
                                                 !programacion.fechaInicioServicio &&
                                                 programacion.estado !== 3 && (
                                                   <>
-                                                    {programacion.estado ===
+                                                    {programacion.estado ==
                                                       0 && (
                                                       <a
                                                         className="btn btn-primary fw-bold text-white me-2 mb-2"
@@ -882,13 +886,13 @@ function App() {
                               <strong>Inicio de servicio:</strong>{" "}
                               {new Date(
                                 selectedprogramm.fechaInicioServicio
-                              ).toLocaleString()}
+                              ).toLocaleString("es-CO")}
                             </p>
                             <p className="card-text mb-1">
                               <strong>Fin de servicio:</strong>{" "}
                               {new Date(
                                 selectedprogramm.fechaFinServicio
-                              ).toLocaleString()}
+                              ).toLocaleString("es-CO")}
                             </p>
                           </>
                         )}
