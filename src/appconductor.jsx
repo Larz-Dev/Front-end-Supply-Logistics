@@ -441,10 +441,24 @@ function App() {
                                               {programacion.fechaAsignada
                                                 ? `Asignada: ${new Date(
                                                     programacion.fechaAsignada
-                                                  ).toLocaleString("es-CO")}`
+                                                  ).toLocaleString("es-CO", {
+                                                    year: "numeric",
+                                                    month: "2-digit",
+                                                    day: "2-digit",
+                                                    hour: "2-digit",
+                                                    minute: "2-digit",
+                                                    hour12: false,
+                                                  })}`
                                                 : `Estimada: ${new Date(
                                                     programacion.fechaEstimadaLlegada
-                                                  ).toLocaleString("es-CO")}`}
+                                                  ).toLocaleString("es-CO", {
+                                                    year: "numeric",
+                                                    month: "2-digit",
+                                                    day: "2-digit",
+                                                    hour: "2-digit",
+                                                    minute: "2-digit",
+                                                    hour12: false,
+                                                  })}`}
                                             </span>
                                           </td>
                                           <td>
@@ -841,7 +855,14 @@ function App() {
                             <strong>Fecha asignada:</strong>{" "}
                             {new Date(
                               selectedprogramm.fechaAsignada
-                            ).toLocaleString("es-CO")}
+                            ).toLocaleString("es-CO", {
+                              year: "numeric",
+                              month: "2-digit",
+                              day: "2-digit",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                              hour12: false,
+                            })}
                           </p>
                           <p className="card-text mb-1">
                             <strong>Área asignada:</strong>{" "}
@@ -853,7 +874,14 @@ function App() {
                           <strong>Fecha estimada:</strong>{" "}
                           {new Date(
                             selectedprogramm.fechaEstimadaLlegada
-                          ).toLocaleString("es-CO")}
+                          ).toLocaleString("es-CO", {
+                            year: "numeric",
+                            month: "2-digit",
+                            day: "2-digit",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: false,
+                          })}
                         </p>
                       )}
 
@@ -864,13 +892,27 @@ function App() {
                               <strong>Inicio de servicio:</strong>{" "}
                               {new Date(
                                 selectedprogramm.fechaInicioServicio
-                              ).toLocaleString("es-CO")}
+                              ).toLocaleString("es-CO", {
+                                year: "numeric",
+                                month: "2-digit",
+                                day: "2-digit",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                hour12: false,
+                              })}
                             </p>
                             <p className="card-text mb-1">
                               <strong>Fin de servicio:</strong>{" "}
                               {new Date(
                                 selectedprogramm.fechaFinServicio
-                              ).toLocaleString("es-CO")}
+                              ).toLocaleString("es-CO", {
+                                year: "numeric",
+                                month: "2-digit",
+                                day: "2-digit",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                hour12: false,
+                              })}
                             </p>
                           </>
                         )}
@@ -1140,7 +1182,14 @@ function App() {
                             <strong>Fecha asignada:</strong>{" "}
                             {new Date(
                               selectedprogramm.fechaAsignada
-                            ).toLocaleString("es-CO")}
+                            ).toLocaleString("es-CO", {
+                              year: "numeric",
+                              month: "2-digit",
+                              day: "2-digit",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                              hour12: false,
+                            })}
                           </p>
                           <p className="card-text mb-1">
                             <strong>Área asignada:</strong>{" "}
@@ -1152,7 +1201,14 @@ function App() {
                           <strong>Fecha estimada:</strong>{" "}
                           {new Date(
                             selectedprogramm.fechaEstimadaLlegada
-                          ).toLocaleString("es-CO")}
+                          ).toLocaleString("es-CO", {
+                            year: "numeric",
+                            month: "2-digit",
+                            day: "2-digit",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: false,
+                          })}
                         </p>
                       )}
 
@@ -1163,13 +1219,27 @@ function App() {
                               <strong>Inicio de servicio:</strong>{" "}
                               {new Date(
                                 selectedprogramm.fechaInicioServicio
-                              ).toLocaleString("es-CO")}
+                              ).toLocaleString("es-CO", {
+                                year: "numeric",
+                                month: "2-digit",
+                                day: "2-digit",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                hour12: false,
+                              })}
                             </p>
                             <p className="card-text mb-1">
                               <strong>Fin de servicio:</strong>{" "}
                               {new Date(
                                 selectedprogramm.fechaFinServicio
-                              ).toLocaleString("es-CO")}
+                              ).toLocaleString("es-CO", {
+                                year: "numeric",
+                                month: "2-digit",
+                                day: "2-digit",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                hour12: false,
+                              })}
                             </p>
                           </>
                         )}
