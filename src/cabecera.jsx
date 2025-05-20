@@ -3,7 +3,7 @@ import { Cerrarsesion, variables, Validarsesion } from "./funciones";
 import loadingProfile from "./assets/images/ProfileLoading.gif";
 
 const Cabecera = () => {
-  const [profileImage, setProfileImage] = useState(null);
+//  const [profileImage, setProfileImage] = useState(null);
   const [timer, setTimer] = useState(""); // State for the timer
   let tipo = "";
   Validarsesion();
@@ -15,7 +15,8 @@ const Cabecera = () => {
     } else {
       tipo = "conductor";
     }
-    fetch(variables("API") + "/" + tipo + "/profile", {
+  
+/*  fetch(variables("API") + "/" + tipo + "/profile", {
       method: "Post",
       headers: {
         "Content-Type": "application/json",
@@ -31,7 +32,9 @@ const Cabecera = () => {
       .catch((error) => {
         setProfileImage(null);
         console.error("Error fetching profile image:", error);
-      });
+      });*/
+
+
 
     // Calculate the logout time
     const logoutTime = sessionStorage.getItem("logoutTime");
@@ -128,12 +131,13 @@ const Cabecera = () => {
                   <span className="text-black m-2 ">
                     {sessionStorage.getItem("user")}
                   </span>
-                  <img
+
+                  {/*  <img
                     src={profileImage || loadingProfile}
                     className="rounded-circle border border-1 p-2"
                     width="50"
                     height="50"
-                  />
+                  />*/}
 
                   <small className=" opacity-50 m-2 ">{timer}</small>
                 </button>
