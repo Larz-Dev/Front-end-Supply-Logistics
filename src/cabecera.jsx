@@ -121,9 +121,9 @@ const Cabecera = () => {
         <div className="  text-star ">
           <div className="social-media order-lg-last  ">
             <span className="mb-0 d-flex">
-              <div className="dropup  bg-white rounded-3 ">
+              <div className="dropup  bg-white  rounded-top fw-bold bg-supply">
                 <button
-                  className="btn "
+                  className="btn fw-bold "
                   type="button"
                   data-bs-toggle="dropdown"
                   aria-expanded="false"
