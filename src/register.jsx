@@ -169,7 +169,7 @@ const RegisterConductor = () => {
             <h3 className="mb-2 text-center">Formulario de Registro</h3>
             <form onSubmit={handleSubmit} encType="multipart/form-data">
               <div className="mb-1">
-                <label className="form-label">Nombre</label>
+                <label className="form-label fw-bold">Nombre</label>
                 <input
                   type="text"
                   className="form-control"
@@ -180,7 +180,7 @@ const RegisterConductor = () => {
                 />
               </div>
               <div className="mb-1">
-                <label className="form-label">Apellido</label>
+                <label className="form-label fw-bold">Apellido</label>
                 <input
                   type="text"
                   className="form-control"
@@ -191,7 +191,7 @@ const RegisterConductor = () => {
                 />
               </div>
               <div className="mb-1">
-                <label className="form-label">Documento</label>
+                <label className="form-label fw-bold">Documento</label>
                 <input
                   type="number"
                   className="form-control"
@@ -199,11 +199,11 @@ const RegisterConductor = () => {
                   value={formData.documento}
                   required
                   onChange={handleChange}
-                  minLength="7"
+                  minLength="5"
                 />
               </div>
               <div className="mb-1">
-                <label className="form-label">Correo electrónico</label>
+                <label className="form-label fw-bold">Correo electrónico</label>
                 <input
                   type="email"
                   className="form-control"
@@ -214,7 +214,7 @@ const RegisterConductor = () => {
                 />
               </div>
               <div className="mb-1">
-                <label className="form-label">Teléfono</label>
+                <label className="form-label fw-bold">Teléfono</label>
                 <input
                   type="number"
                   className="form-control"
@@ -224,7 +224,7 @@ const RegisterConductor = () => {
                 />
               </div>
               <div className="mb-1">
-                <label className="form-label">Contraseña</label>
+                <label className="form-label fw-bold">Contraseña</label>
                 <input
                   type="password"
                   className="form-control"
@@ -236,7 +236,7 @@ const RegisterConductor = () => {
                 />
               </div>
               <div className="mb-1">
-                <label className="form-label">Confirmar Contraseña</label>
+                <label className="form-label fw-bold">Confirmar Contraseña</label>
                 <input
                   type="password"
                   className="form-control"
@@ -247,7 +247,7 @@ const RegisterConductor = () => {
                 />
               </div>
               <div className="mb-1">
-                <label className="form-label">Transportadora</label>
+                <label className="form-label fw-bold">Transportadora</label>
                 <input
                   type="text"
                   className="form-control"
