@@ -20,7 +20,7 @@ import Sidebar from "./sidebar.jsx";
 import * as XLSX from "xlsx";
 import EditarRecibo from "./Editar.jsx";
 function App() {
-  Validarsesion();
+Validarsesion();
 
   if (sessionStorage.getItem("rol") == 4) {
     window.location = "/appconductor";
@@ -246,6 +246,7 @@ function App() {
   return (
     <>
       <div className="row w-100 p-0 m-0">
+        
         {sidebarVisible && (
           <div
             className={`d-flex flex-column bg-light align-items-center  ${
@@ -255,8 +256,10 @@ function App() {
             }`}
             style={{ zIndex: 1050 }}
           >
+            
             <Sidebar />
-            {!isMobile && <Cabecera />}
+             <Cabecera />
+            {!isMobile }
           </div>
         )}
 

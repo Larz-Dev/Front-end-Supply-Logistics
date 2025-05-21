@@ -243,7 +243,8 @@ function App() {
             style={{ zIndex: 1050 }}
           >
             <Sidebar />
-            {!isMobile && <Cabecera />}
+            <Cabecera />
+            {!isMobile }
           </div>
         )}
 
