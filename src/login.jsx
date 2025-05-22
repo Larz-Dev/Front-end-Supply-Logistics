@@ -95,15 +95,13 @@ const Login = () => {
 
   // Fondo
 
-
-   document.body.style.backgroundImage = `url(${Fondo})`;
-    document.body.style.backgroundSize = "cover";
-    document.body.style.backgroundRepeat = "no-repeat";
-    document.body.style.backgroundPosition = "center";
-    document.body.style.backgroundAttachment = "fixed";
-    document.body.style.height = "100vh";
-    document.body.style.margin = "0";
-
+  document.body.style.backgroundImage = `url(${Fondo})`;
+  document.body.style.backgroundSize = "cover";
+  document.body.style.backgroundRepeat = "no-repeat";
+  document.body.style.backgroundPosition = "center";
+  document.body.style.backgroundAttachment = "fixed";
+  document.body.style.height = "100vh";
+  document.body.style.margin = "0";
 
   return (
     <div
@@ -120,41 +118,48 @@ const Login = () => {
             <br />
             <br />
             <br />
+              <br />
             <h1>Ingresar</h1>
           </div>
 
-          <div className="">
-            <label htmlFor="documento" className="form-label">
-              Documento
-            </label>
-            <input
-              type="number"
-              className="form-control"
-              min={0}
-              id="documento"
-              value={documento}
-              onChange={(e) => setdocumento(e.target.value)}
-              required
-            />
-          </div>
-          <div className="mb-3">
-            <label htmlFor="password" className="form-label">
-              Contraseña
-            </label>
-            <input
-              type="password"
-              className="form-control"
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
+          <div className="input-group mb-3">
+    <span className="input-group-text" id="documento-addon">
+      <i className="fa-regular fa-id-card"></i>
+    </span>
+    <input
+      type="number"
+      className="form-control"
+      placeholder="Documento"
+      aria-label="Documento"
+      aria-describedby="documento-addon"
+      value={documento}
+      onChange={(e) => setdocumento(e.target.value)}
+      required
+      min={0}
+    />
+  </div>
+
+  <div className="input-group mb-3">
+    <span className="input-group-text" id="password-addon">
+      <i className="fa-solid fa-key"></i>
+    </span>
+    <input
+      type="password"
+      className="form-control"
+      placeholder="Contraseña"
+      aria-label="Contraseña"
+      aria-describedby="password-addon"
+      value={password}
+      onChange={(e) => setPassword(e.target.value)}
+      required
+    />
+    
+  </div>
           <div className="button-container row">
             <button type="submit" className="btn hover-b mb-1">
               Ingresar
             </button>
-            <span className="text-center">o</span>
+     <p></p>
             <a href="/register" className="btn hover-b ">
               Registrate como conductor
             </a>
