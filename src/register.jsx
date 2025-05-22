@@ -69,8 +69,8 @@ const RegisterConductor = () => {
     for (const key in formData) {
       if (key == "phone") {
         form.append(key, formData["prefijo"] + formData[key]);
-      }
-      form.append(key, formData[key]);
+      }else{  form.append(key, formData[key]);}
+    
     }
 
     try {
