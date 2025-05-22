@@ -37,7 +37,7 @@ const RegisterConductor = () => {
     event.preventDefault();
 
     // Validación de número de documento y contraseñas
-    if (formData.documento.length < 7) {
+    if (formData.documento.length < 5) {
       Swal.fire({
         icon: "error",
         title: "Error",
@@ -66,6 +66,9 @@ const RegisterConductor = () => {
 
     const form = new FormData();
     for (const key in formData) {
+      if (key == "phone") {
+        form.append(key,"57"+ formData[key]);
+      }
       form.append(key, formData[key]);
     }
 
@@ -167,115 +170,172 @@ const RegisterConductor = () => {
             style={{ maxWidth: "500px" }}
           >
             <h3 className="mb-2 text-center">Formulario de Registro</h3>
-            <form onSubmit={handleSubmit} encType="multipart/form-data">
-              <div className="mb-1">
-                <label className="form-label fw-bold">Nombre</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  name="Nombre1"
-                  value={formData.Nombre1}
-                  required
-                  onChange={handleChange}
-                />
-              </div>
-              <div className="mb-1">
-                <label className="form-label fw-bold">Apellido</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  name="Apellido1"
-                  value={formData.Apellido1}
-                  required
-                  onChange={handleChange}
-                />
-              </div>
-              <div className="mb-1">
-                <label className="form-label fw-bold">Documento</label>
-                <input
-                  type="number"
-                  className="form-control"
-                  name="documento"
-                  value={formData.documento}
-                  required
-                  onChange={handleChange}
-                  minLength="5"
-                />
-              </div>
-              <div className="mb-1">
-                <label className="form-label fw-bold">Correo electrónico</label>
-                <input
-                  type="email"
-                  className="form-control"
-                  name="email"
-                  value={formData.email}
-                  required
-                  onChange={handleChange}
-                />
-              </div>
-              <div className="mb-1">
-                <label className="form-label fw-bold">Teléfono</label>
-                <input
-                  type="number"
-                  className="form-control"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                />
-              </div>
-              <div className="mb-1">
-                <label className="form-label fw-bold">Contraseña</label>
-                <input
-                  type="password"
-                  className="form-control"
-                  name="password"
-                  value={formData.password}
-                  required
-                  onChange={handleChange}
-                  minLength="8"
-                />
-              </div>
-              <div className="mb-1">
-                <label className="form-label fw-bold">Confirmar Contraseña</label>
-                <input
-                  type="password"
-                  className="form-control"
-                  name="confirmPassword"
-                  value={formData.confirmPassword}
-                  required
-                  onChange={handleChange}
-                />
-              </div>
-              <div className="mb-1">
-                <label className="form-label fw-bold">Transportadora</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  name="transportadorasugerida"
-                  value={formData.transportadorasugerida}
-                  onChange={handleChange}
-                />
-              </div><p></p>
-              <div className="d-flex justify-content-between gap-2 mb-3">
-                <a href="/login" className="btn btn-secondary w-50">
-                  Regresar
-                </a>
-                <button type="submit" className="btn btn-primary w-50">
-                  Registrarse
-                </button>
-              </div>
-              <div className="d-grid">
-                <a
-                  href="https://wa.me/573012500115?text=Hola%20deseo%20empezar%20a%20usar%20la%20aplicaci%C3%B3n,%20por%20qu%C3%A9%20deber%C3%ADa%20comenzar?"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn btn-success"
-                >
-                  <i className="fab fa-whatsapp me-2"></i> Contactar por
-                  WhatsApp
-                </a>
-              </div>
-            </form>
+       <br />
+           <form onSubmit={handleSubmit} encType="multipart/form-data">
+  <div className="row">
+    <div className="col-md-6 mb-3">
+      <label className="form-label fw-bold">
+        <i className="fa-regular fa-user"></i> Nombre
+      </label>
+      <div className="input-group">
+        <input
+          type="text"
+          className="form-control"
+          
+          name="Nombre1"
+          value={formData.Nombre1}
+          required
+          onChange={handleChange}
+        />
+      </div>
+    </div>
+
+    <div className="col-md-6 mb-3">
+      <label className="form-label fw-bold">
+        <i className="fa-regular fa-user"></i> Apellido
+      </label>
+      <div className="input-group">
+        <input
+          type="text"
+          className="form-control"
+         
+          name="Apellido1"
+          value={formData.Apellido1}
+          required
+          onChange={handleChange}
+        />
+      </div>
+    </div>
+
+    <div className="col-md-6 mb-3">
+      <label className="form-label fw-bold">
+        <i className="fa-regular fa-address-card"></i> Documento
+      </label>
+      <div className="input-group">
+        <input
+          type="number"
+          className="form-control"
+      
+          name="documento"
+          value={formData.documento}
+          required
+          onChange={handleChange}
+          minLength="5"
+        />
+      </div>
+    </div>
+
+    <div className="col-md-6 mb-3">
+      <label className="form-label fw-bold">
+        <i className="fa-regular fa-envelope"></i> Correo electrónico
+      </label>
+      <div className="input-group">
+        <span className="input-group-text">@</span>
+        <input
+          type="email"
+          className="form-control"
+      
+          name="email"
+          value={formData.email}
+          required
+          onChange={handleChange}
+        />
+      </div>
+    </div>
+
+    <div className="col-md-6 mb-3">
+      <label className="form-label fw-bold">
+        <i className="fa-solid fa-phone"></i> Teléfono
+      </label>
+      <div className="input-group">
+        <span className="input-group-text">+57</span>
+        <input
+          type="number"
+          className="form-control"
+        
+          name="phone"
+          value={formData.phone}
+          onChange={handleChange}
+        />
+      </div>
+    </div>
+
+    <div className="col-md-6 mb-3">
+      <label className="form-label fw-bold">
+        <i className="fa-solid fa-key"></i> Contraseña
+      </label>
+      <div className="input-group">
+        <input
+          type="password"
+          className="form-control"
+      
+          name="password"
+          value={formData.password}
+          required
+          onChange={handleChange}
+          minLength="8"
+        />
+      </div>
+      <div className="form-text small">
+        Contener 8 caracteres mínimo
+      </div>
+    </div>
+
+    <div className="col-md-6 mb-3">
+      <label className="form-label fw-bold">
+        <i className="fa-solid fa-truck-moving"></i> Transportadora
+      </label>
+      <div className="input-group">
+        <input
+          type="text"
+          className="form-control"
+    
+          name="transportadorasugerida"
+          value={formData.transportadorasugerida}
+          onChange={handleChange}
+        />
+      </div>
+    </div>
+
+    <div className="col-md-6 mb-3">
+      <label className="form-label fw-bold">
+        <i className="fa-solid fa-key"></i> Confirmar Contraseña
+      </label>
+      <div className="input-group">
+        <input
+          type="password"
+          className="form-control"
+      
+          name="confirmPassword"
+          value={formData.confirmPassword}
+          required
+          onChange={handleChange}
+        />
+      </div>
+    </div>
+  </div>
+
+  <div className="d-flex justify-content-between gap-2 mb-3">
+    <a href="/login" className="btn btn-secondary w-50">
+      Regresar
+    </a>
+    <button type="submit" className="btn btn-primary w-50">
+      Registrarse
+    </button>
+  </div>
+
+  <div className="d-grid">
+    <a
+      href="https://wa.me/573012500115?text=Hola%20deseo%20empezar%20a%20usar%20la%20aplicaci%C3%B3n,%20por%20qu%C3%A9%20deber%C3%ADa%20comenzar?"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="btn btn-success"
+    >
+      <i className="fab fa-whatsapp me-2"></i> Contactar por WhatsApp
+    </a>
+  </div>
+</form>
+
           </div>
         </div>
       </div>
