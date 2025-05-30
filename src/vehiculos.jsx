@@ -182,22 +182,21 @@ const Vehiculo = () => {
     const selected = conductoresList.find(
       (c) => c.idConductor === vehiculo.idConductor
     );
-  
+
     setSelectedConductor(selected || null);
     setConductorInputValue(
-      selected ? `${selected.Nombre1} ${selected.Nombre2}` : ""
+      selected ? `${selected?.Nombre1} ${selected?.Nombre2}` : ""
     );
-  
+
     setFormData({
       idVehiculo: vehiculo.idVehiculo,
       placa: vehiculo.placa,
       tipo: vehiculo.tipo,
       idConductor: vehiculo.conductor.idConductor, // Esto es correcto, deberías asegurarte de que se actualice correctamente
     });
-  
+
     setEditing(true);
   };
-  
 
   const handleDelete = async (idVehiculo) => {
     try {
@@ -268,15 +267,17 @@ const Vehiculo = () => {
           onChange={(e) => {
             const input = e.target.value;
             setConductorInputValue(input);
-          
+
             // Buscar coincidencias parciales
             const selected = conductoresList.find((c) => {
-              const fullName = `${c.Nombre1} ${c.Nombre2}`;
+              const fullName = `${c?.Nombre1 || "Sin conductor"} ${
+                c?.Nombre2 || ""
+              }`;
               return fullName.toLowerCase().includes(input.toLowerCase());
             });
-          
+
             setSelectedConductor(selected || null);
-          
+
             if (selected) {
               setFormData((prev) => ({
                 ...prev,
@@ -284,11 +285,12 @@ const Vehiculo = () => {
               }));
             }
           }}
-          
           onBlur={() => {
             // Si al perder foco el valor no es válido, limpiamos idConductor
             const match = conductoresList.find((c) => {
-              const fullName = `${c.Nombre1} ${c.Nombre2}`;
+              const fullName = `${c.Nombre1 || "Sin conductor"} ${
+                c.Nombre2 || ""
+              }`;
               return (
                 fullName.toLowerCase() === conductorInputValue.toLowerCase()
               );
@@ -305,7 +307,10 @@ const Vehiculo = () => {
 
         <datalist id="conductoresList">
           {conductoresList.map((c) => (
-            <option key={c.idConductor} value={`${c.Nombre1} ${c.Nombre2}`}>
+            <option
+              key={c.idConductor}
+              value={`${c?.Nombre1 || "Sin conductor"} ${c?.Nombre2 || ""}`}
+            >
               {c.documento}
             </option>
           ))}
@@ -346,7 +351,8 @@ const Vehiculo = () => {
                 <td>{vehiculo.placa}</td>
                 <td>{vehiculo.tipo}</td>
                 <td>
-                  {vehiculo.conductor.Nombre1} {vehiculo.conductor.Nombre2}
+                  {vehiculo?.conductor?.Nombre1 || "Sin conductor"}{" "}
+                  {vehiculo?.conductor?.Nombre2 || ""}
                 </td>
                 <td>
                   <button
