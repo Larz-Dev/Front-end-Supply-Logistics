@@ -211,7 +211,7 @@ const Conductores = () => {
                 }
                 className="form-control mb-2 p-3"
                 name={name}
-                placeholder={placeholder}
+                placeholder=""
                 value={formData[name]}
                 onChange={handleChange}
                 required={
@@ -263,7 +263,7 @@ const Conductores = () => {
             </datalist>
           </div>
 
-          <div className="col-md-6">
+      {/*  <div className="col-md-6">
             <label>Foto de perfil</label>
             <input
               type="file"
@@ -279,7 +279,7 @@ const Conductores = () => {
                 style={{ width: "100px", height: "100px" }}
               />
             )}
-          </div>
+          </div> */}
         </div>
 
         <button className={`btn ${editing ? "btn-success" : "btn-primary"}`}>
