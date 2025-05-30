@@ -163,14 +163,17 @@ const Vehiculo = () => {
       const data = await response.json();
       Notificar(data.mensaje, data.status, "normal");
       if (data.status === "success") {
-        setFormData({
-          idVehiculo: "",
-          placa: "",
+        const newTotalPosts = totalPosts - 1;
+        const newTotalPages = Math.ceil(newTotalPosts / postsPerPage);
 
-          tipo: "",
-        });
-        setEditing(false);
-        fetchVehiculos();
+        // Si estamos en una página que ya no existe, ir a la anterior
+        if (currentPage > newTotalPages) {
+          setCurrentPage(newTotalPages || 1);
+        } else {
+          fetchVehiculos();
+        }
+
+        setTotalPosts(newTotalPosts); // Actualiza el total de publicaciones
       }
     } catch (error) {
       Notificar("Error al guardar el vehículo", "error", "normal");
