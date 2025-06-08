@@ -53,6 +53,8 @@ export function variables(nombreVariable) {
     respuesta = "https://back-end-supply-logistics-camiones-2c4m.onrender.com";
     //"https://back-end-supply-logistics-camiones-2c4m.onrender.com"
     //"http://localhost:3000"
+    //"http://localhost:3000"
+    "https://back-end-supply-logistics-camiones-2c4m.onrender.com"
  //"http://10.177.1.211:3000"
     //"https://back-end-supply-logistics-camiones-2c4m.onrender.com"
 

@@ -319,7 +319,7 @@ const Conductores = () => {
               <tr key={c.idConductor}>
                 <td>{c.idConductor}</td>
                 <td>
-                  {c.nombres} {c.apellidos}
+                  {c.Nombre1} {c.Apellido1}
                 </td>
                 <td>{c.documento}</td>
                 <td>{c.phone}</td>

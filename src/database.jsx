@@ -7,6 +7,7 @@ import Servicios from "./servicios.jsx";
 import Vehiculos from "./vehiculos.jsx";
 import Empleados from "./empleados.jsx";
 import Usuarios from "./usuarios.jsx";
+import Asignaciones from "./asignaciones.jsx";
 import Conductores from "./conductores.jsx";
 import Nomina from "./nomina.jsx";
 import Myvehiculos from "./vehiculosconductor.jsx";
@@ -65,7 +66,8 @@ function Database() {
           {base === "Vehiculos" && <Vehiculos />}
           {base === "Servicios" && <Servicios />}
           {base === "Empleados" && <Empleados />}
-          {base === "Usuarios" && <Usuarios />}
+          {base === "Usuarios" && <Usuarios />}      
+          {base === "Asignaciones" && <Asignaciones />}
           {base === "Nomina" && <Nomina />}
           {base === "Conductores" && <Conductores />}
           {base === "Misvehiculos" && <Myvehiculos />}

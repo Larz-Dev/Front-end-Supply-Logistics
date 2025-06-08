@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+//import { Link } from "react-router-dom";
 import Cabecera from "./cabecera.jsx";
 import React from "react";
 import { useIsMobile } from "./useIsMobile.jsx"; // ajusta el path
-
 //import Publicar from "./publicar.jsx";
 import {
   Validarsesion,
@@ -11,16 +10,14 @@ import {
   variables,
   Notificar,
 } from "./funciones.jsx";
-
-import loadingPost from "./assets/images/PostLoading.gif";
-import loadingProfile from "./assets/images/ProfileLoading.gif";
-
-import ImageMaximizer from "./maximizer.jsx";
+//import loadingPost from "./assets/images/PostLoading.gif";
+//import loadingProfile from "./assets/images/ProfileLoading.gif";
+//import ImageMaximizer from "./maximizer.jsx";
 import Sidebar from "./sidebar.jsx";
-import * as XLSX from "xlsx";
-import EditarRecibo from "./Editar.jsx";
+//import * as XLSX from "xlsx";
+//import EditarRecibo from "./Editar.jsx";
 function App() {
-Validarsesion();
+  Validarsesion();
 
   if (sessionStorage.getItem("rol") == 4) {
     window.location = "/appconductor";
@@ -41,6 +38,9 @@ Validarsesion();
   const [areaAsignada, setAreaAsignada] = useState("");
   const [fechaAsignada, setFechaAsignada] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+
+  const [Montacargas, setMontacargas] = useState(1);
+  const [Auxiliares, setAuxiliares] = useState(1);
   const [buscarFecha, setbuscarFecha] = useState(true);
   const [todo, setTodo] = useState(false);
   const [total, setTotal] = useState(0);
@@ -73,9 +73,34 @@ Validarsesion();
   };
   const programacionesPorArea = {};
 
+  const [areas, setAreas] = useState([]);
+  const [recurso, setRecurso] = useState(null);
+
+  useEffect(() => {
+    fetch(variables("API") + "/programacion/areas", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && Array.isArray(data.areas)) {
+          setAreas(data.areas);
+        }
+        if (data && data.recurso) {
+          setRecurso(data.recurso); // recuerda definir recurso con useState
+        }
+      })
+      .catch((err) => {
+        console.error("Error al obtener las áreas:", err);
+      });
+  }, []);
+
   // Agrupar por área y luego por fecha (formateada como YYYY-MM-DD)
   filteredProgramaciones.forEach((prog) => {
-    const area = prog.area || "Sin área";
+    const area = prog.area?.nombre || "Sin área";
     const fecha = new Date(prog.fechaAsignada || prog.fechaEstimadaLlegada)
       .toISOString()
       .split("T")[0]; // YYYY-MM-DD
@@ -246,7 +271,6 @@ Validarsesion();
   return (
     <>
       <div className="row w-100 p-0 m-0">
-        
         {sidebarVisible && (
           <div
             className={`d-flex flex-column bg-light align-items-center  ${
@@ -256,10 +280,9 @@ Validarsesion();
             }`}
             style={{ zIndex: 1050 }}
           >
-            
             <Sidebar />
-             <Cabecera />
-            {!isMobile }
+            <Cabecera />
+            {!isMobile}
           </div>
         )}
 
@@ -789,34 +812,109 @@ Validarsesion();
 
             <div className="p-3 bor">
               {/* Mostrar solo si estado es 0 */}
-              {selectedprogramm.estado === 0 && (
-                <div>
-                  <h4 className="mb-3">Confirmar solicitud</h4>
-                  <div className="mb-3">
-                    <label htmlFor="asignarArea" className="form-label">
-                      Asignar área
-                    </label>
-                    <input
-                      type="text"
-                      id="asignarArea"
-                      className="form-control"
-                      value={areaAsignada}
-                      onChange={(e) => setAreaAsignada(e.target.value)}
-                    />
-                    <label htmlFor="asignarArea" className="form-label">
-                      <p></p>
-                      Asignar fecha
-                    </label>
-                    <input
-                      type="datetime-local"
-                      id="asignarFecha"
-                      className="form-control"
-                      value={fechaAsignada}
-                      onChange={(e) => setFechaAsignada(e.target.value)}
-                    />
-                  </div>
-                </div>
-              )}
+           {selectedprogramm.estado === 0 && (
+  <div>
+    {/* Resumen arriba */}
+   
+
+    <h4 className="mb-3">Confirmar solicitud</h4>
+    <div className="mb-3">
+      <label htmlFor="asignarArea" className="form-label">
+        Asignar área
+      </label>
+      <select
+        id="asignarArea"
+        className="form-select"
+        value={areaAsignada}
+        onChange={(e) => setAreaAsignada(e.target.value)}
+      >
+        <option value="">Selecciona un área...</option>
+        {areas.map((area) => (
+          <option key={area.idArea} value={area.idArea}>
+            {area.nombre}
+          </option>
+        ))}
+      </select>
+
+      <label htmlFor="asignarFecha" className="form-label mt-3">
+        Asignar fecha
+      </label>
+      <input
+        type="datetime-local"
+        id="asignarFecha"
+        className="form-control"
+        value={fechaAsignada}
+        onChange={(e) => setFechaAsignada(e.target.value)}
+      />
+
+<br />
+
+<div className="table-responsive shadow-sm">
+  <table className="table table-bordered align-middle text-center">
+    <thead className="table-light">
+      <tr>
+        <th>Recurso</th>
+        <th>Total</th>
+        <th>Disponibles</th>
+        <th>Asignar</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Áreas registradas</td>
+        <td>{areas.length}</td>
+        <td>{areas.filter((a) => a.programacionActual !== null).length}</td>
+        <td>-</td>
+      </tr>
+      <tr>
+        <td>Montacargas</td>
+        <td>{recurso.totalMontacargas}</td>
+        <td>{recurso.montacargasActuales - (Montacargas || 0)} <i className="fas fa-truck text-primary"></i></td>
+        <td style={{ width: "100px" }}>
+          <input
+            type="number"
+            min={0}
+            max={recurso.montacargasActuales}
+            value={Montacargas}
+            onChange={(e) => {
+              let val = Number(e.target.value);
+              if (val > recurso.montacargasActuales) val = recurso.montacargasActuales;
+              if (val < 0) val = 0;
+              setMontacargas(val);
+            }}
+            className="form-control form-control-sm"
+          />
+        </td>
+      </tr>
+      <tr>
+        <td>Auxiliares</td>
+        <td>{recurso.totalAuxiliares}</td>
+        <td>{recurso.auxiliaresActuales - (Auxiliares || 0)} <i className="fas fa-user text-info"></i></td>
+        <td style={{ width: "100px" }}>
+          <input
+            type="number"
+            min={0}
+            max={recurso.auxiliaresActuales}
+            value={Auxiliares}
+            onChange={(e) => {
+              let val = Number(e.target.value);
+              if (val > recurso.auxiliaresActuales) val = recurso.auxiliaresActuales;
+              if (val < 0) val = 0;
+              setAuxiliares(val);
+            }}
+            className="form-control form-control-sm"
+          />
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+    </div>
+    
+  </div>
+)}
+
 
               {/* Mostrar solo si estado es 1 o 2 */}
               {(selectedprogramm.estado === 1 ||
@@ -1075,7 +1173,9 @@ Validarsesion();
                       if (
                         selectedprogramm.estado == 0 &&
                         fechaAsignada != "" &&
-                        areaAsignada != ""
+                        areaAsignada != "" &&
+                        Montacargas > 0 &&
+                        Auxiliares > 0
                       ) {
                         fetch(variables("API") + `/programacion/confirm`, {
                           method: "POST", // Specify the method if needed (GET is default)
@@ -1088,7 +1188,9 @@ Validarsesion();
                           body: JSON.stringify({
                             idProgramacion: selectedprogramm.idProgramacion,
                             fechaAsignada: fechaAsignada,
-                            areaAsignada: areaAsignada,
+                            idArea: areaAsignada,
+                            montacargasAsignados: Montacargas,
+                            auxiliaresAsignados: Auxiliares,
                             idUsuario: sessionStorage.getItem("idUsuario"),
                           }),
                         })
