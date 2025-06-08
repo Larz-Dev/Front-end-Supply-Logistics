@@ -162,7 +162,7 @@ const Asignaciones = () => {
                         <div className="border rounded p-3 bg-light">
                           <div>
                             <strong>ID:</strong>{" "}
-                            {area.programacionActual.idProgramacion}
+                            {area.programacionActual.numeroDelDia}
                           </div>
                           <div>
                             <strong>Producto:</strong>{" "}
@@ -201,7 +201,7 @@ const Asignaciones = () => {
                             )}
                           </div>
                           <div>
-                            <strong>Contacto:</strong>{" "}
+                            <strong>Dirección:</strong>{" "}
                             {area.programacionActual.contacto || ""}
                           </div>
                           <div>
