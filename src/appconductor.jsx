@@ -89,7 +89,7 @@ function App() {
 
   // Agrupar por área y luego por fecha (formateada como YYYY-MM-DD)
   filteredProgramaciones.forEach((prog) => {
-    const area = prog.area || "Sin área";
+    const area = prog.area.nombre || "Sin área";
     const fecha = new Date(prog.fechaAsignada || prog.fechaEstimadaLlegada)
       .toISOString()
       .split("T")[0]; // YYYY-MM-DD
@@ -218,7 +218,7 @@ function App() {
       return horaA - horaB;
     })
     .reduce((acc, prog) => {
-      const area = prog.area || "Sin asignar";
+      const area = prog.area.nombre || "Sin asignar";
       if (!acc[area]) acc[area] = [];
       acc[area].push(prog);
       return acc;
