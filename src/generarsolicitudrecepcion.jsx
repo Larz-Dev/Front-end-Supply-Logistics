@@ -47,7 +47,7 @@ const CrearProgramacion = ({ onCreated }) => {
 
     try {
       const response = await fetch(
-        variables("API") + "/programacion/createbyconductor",
+        variables("API") + "/programacion/recepcionbyconductor",
         {
           method: "POST",
           headers: {
@@ -90,11 +90,11 @@ const CrearProgramacion = ({ onCreated }) => {
   return (
     <>
       <button
-        className="fw-bold text-white btn btn-success col-md-2 mx-auto"
+        className="fw-bold text-white btn btn-success col-md-2  mx-1"
         data-bs-toggle="modal"
         data-bs-target="#modalProgramacion"
       >
-        Generar solicitud
+        Generar solicitud de recepción
       </button>
 
       <div
@@ -107,7 +107,7 @@ const CrearProgramacion = ({ onCreated }) => {
           <div className="modal-content bg-transparent border-0">
             <div className="rounded-3 fondo2 p-2 my-3 p-3">
               <h2 className="text-white">Enviar Solicitud</h2>
-              <div className=" fs-4 p-3  m-3 bg-body rounded-2">
+              <div className=" fs-5 p-1  m-3 bg-body rounded-2">
                 Al enviar una solicitud, esta le será notificada al sistema para
                 comprobar la disponibilidad de recuros para aternderlo
                 adecuadamente.

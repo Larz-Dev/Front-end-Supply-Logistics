@@ -7,11 +7,13 @@ import Servicios from "./servicios.jsx";
 import Vehiculos from "./vehiculos.jsx";
 import Empleados from "./empleados.jsx";
 import Usuarios from "./usuarios.jsx";
+import Recursos from "./recursos.jsx";
 import Asignaciones from "./asignaciones.jsx";
 import Conductores from "./conductores.jsx";
 import Nomina from "./nomina.jsx";
 import Myvehiculos from "./vehiculosconductor.jsx";
   import { useIsMobile } from "./useIsMobile.jsx"; // ajusta el path
+import ColaProgramaciones from "./cola.jsx";
 
 function Database() {
   const isMobile = useIsMobile();
@@ -66,8 +68,10 @@ function Database() {
           {base === "Vehiculos" && <Vehiculos />}
           {base === "Servicios" && <Servicios />}
           {base === "Empleados" && <Empleados />}
+              {base === "Recursos" && <Recursos />}
           {base === "Usuarios" && <Usuarios />}      
           {base === "Asignaciones" && <Asignaciones />}
+               {base === "Cola" && <ColaProgramaciones />}
           {base === "Nomina" && <Nomina />}
           {base === "Conductores" && <Conductores />}
           {base === "Misvehiculos" && <Myvehiculos />}

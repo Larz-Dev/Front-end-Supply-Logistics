@@ -1,176 +1,223 @@
-import React, { useState } from "react";
-import { variables } from "./funciones.jsx";
+import React, { useState, useRef, useEffect } from 'react';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import {
+  variables
+} from "./funciones.jsx";
 
-const DummyWhatsappChat = () => {
+const ChatTest = () => {
+  const [token, setToken] = useState('');
+  const [input, setInput] = useState(''); 
+  const [numerotelefono, setNumeroTelefono] = useState(57301331323);
   const [messages, setMessages] = useState([]);
-  const [input, setInput] = useState("");
-  const [recipientNumber, setRecipientNumber] = useState("123456789");
-  const [pinVerified, setPinVerified] = useState(false);
-  const [chatActive, setChatActive] = useState(true); // Controla si el chat está activo o no
-  const [selectedOptionText, setSelectedOptionText] = useState("");
+  const chatRef = useRef(null);
 
-  const opciones = {
-    text: "Aquí tienes algunas opciones:",
-    replies: [
-      { id: 1, text: "Generar solicitud de carga y llegada de vehículo" },
-      { id: 2, text: "Consultar estado de viajes" },
-      { id: 3, text: "Consultar mis vehículos" },
-      { id: 4, text: "Registrar vehículo" },
-    ],
+  const generateMessageId = () => {
+    const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+    let result = 'wamid.';
+    for (let i = 0; i < 8; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
   };
 
-  // Función para enviar el mensaje al backend
-  const enviarMensajeBackend = async (messageText) => {
+  const enviarMensajeSimulado = async (payload) => {
     try {
-      const response = await fetch(
-        variables("API") + "/whatsapp/receive-dummy",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            fromNumber: recipientNumber,
-            messageText: messageText,
-          }),
-        }
-      );
+      const response = await fetch(variables("API") + "/whatsapp/receive", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
 
       const data = await response.json();
 
-      // Si el backend responde correctamente
-      if (data.status === "success") {
-        const botResponseText = data.datos.botResponse; // Respuesta del backend
-        addMessage("bot", botResponseText); // Agregar la respuesta del bot
+      const payloadData = data.debugMessages?.[0]?.payload;
+      const text = payloadData?.text?.body || payloadData?.interactive?.body?.text || '';
+      const buttons = payloadData?.interactive?.action?.buttons?.map(btn => ({
+        id: btn.reply.id,
+        title: btn.reply.title,
+      })) || [];
 
-        // Si el PIN es verificado, establecer pinVerified en true
-        if (botResponseText.includes("Bienvenido")) {
-          setPinVerified(true);
-          addMessage("bot", opciones.text); // Mostrar las opciones
-          setChatActive(false); // Desactivar el chat para que el usuario no escriba
-        }
-      } else {
-        addMessage("bot", "Hubo un error al recibir el mensaje.");
-      }
+      const botMessage = {
+        role: 'bot',
+        content: { text, buttons },
+      };
+
+      setMessages(prev => [...prev, botMessage]);
+      setInput('');
     } catch (error) {
-      addMessage("bot", "Ocurrió un error en la comunicación.");
+      console.error('Error al enviar mensaje:', error);
+      setMessages(prev => [...prev, {
+        role: 'bot',
+        content: { text: '❌ Error al procesar el mensaje.' },
+      }]);
     }
   };
 
-  // Función para agregar mensajes al chat
-  const addMessage = (sender, text) => {
-    setMessages((prevMessages) => [...prevMessages, { sender, text }]);
+  const handleSend = async () => {
+    const trimmed = input.trim();
+    if (!trimmed) return;
+
+    const newMessage = { role: 'user', content: { text: trimmed } };
+    setMessages(prev => [...prev, newMessage]);
+
+    const payload = {
+      object: 'whatsapp_business_account',
+      entry: [
+        {
+          id: 'test_entry',
+          changes: [
+            {
+              field: 'messages',
+              value: {
+                messaging_product: 'whatsapp',
+                metadata: { phone_number_id: 'test_phone_number' },
+                contacts: [
+                  {
+                    profile: { name: 'Tester' },
+                    wa_id: '573000000000',
+                  },
+                ],
+                messages: [
+                  {
+                    from: numerotelefono,
+                    id: generateMessageId(),
+                    timestamp: Math.floor(Date.now() / 1000).toString(),
+                    type: 'text',
+                    text: { body: trimmed },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      ],
+    };
+
+    await enviarMensajeSimulado(payload);
   };
 
-  // Función para manejar el envío de mensajes
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!input.trim() || !chatActive) return; // Solo enviar mensaje si el chat está activo
+  const handleButtonClick = async (buttonId, title = '') => {
+    const userMsg = {
+      role: 'user',
+      content: { text: title || buttonId }
+    };
+    setMessages(prev => [...prev, userMsg]);
 
-    addMessage("user", input);
-    enviarMensajeBackend(input); // Enviar el mensaje al backend para generar la respuesta del bot
-    setInput(""); // Limpiar el input
+    const payload = {
+      object: 'whatsapp_business_account',
+      entry: [
+        {
+          id: 'test_entry',
+          changes: [
+            {
+              field: 'messages',
+              value: {
+                messaging_product: 'whatsapp',
+                metadata: { phone_number_id: 'test_phone_number' },
+                contacts: [
+                  {
+                    profile: { name: 'Tester' },
+                    wa_id: '573000000000',
+                  },
+                ],
+                messages: [
+                  {
+                    from: numerotelefono,
+                    id: generateMessageId(),
+                    timestamp: Math.floor(Date.now() / 1000).toString(),
+                    type: 'interactive',
+                    interactive: {
+                      type: 'button_reply',
+                      button_reply: {
+                        id: buttonId,
+                        title: title || buttonId,
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      ],
+    };
+
+    await enviarMensajeSimulado(payload);
   };
 
-  // Función para manejar la selección de una opción
-  const handleOptionClick = (id, text) => {
-    setSelectedOptionText(text); // Establecer el texto de la opción seleccionada
-    setChatActive(true); // Reactivar el chat
-    addMessage("user", text); // Mostrar el texto de la opción seleccionada
-    enviarMensajeBackend(String(id)); // Enviar el ID de la opción seleccionada
-  };
-
-  // Función para manejar la cancelación de la acción
-  const handleCancel = () => {
-    setChatActive(true); // Reactivar el chat
-    addMessage("user", "Acción cancelada.");
-    addMessage("bot", "La acción ha sido cancelada.");
-  };
+  useEffect(() => {
+    if (chatRef.current) {
+      chatRef.current.scrollTop = chatRef.current.scrollHeight;
+    }
+  }, [messages]);
 
   return (
-    <div className="container my-5" style={{ maxWidth: "600px" }}>
-      <div className="bg-white p-3 rounded shadow">
-        <h4 className="text-center mb-3">Simulador de Chat WhatsApp</h4>
+    <div className="container mt-4">
+      <h4>🧪 WhatsApp Chat Tester</h4>
 
-        <div className="mb-3">
-          <label htmlFor="recipientNumber" className="form-label">
-            Número del destinatario
-          </label>
-          <input
-            type="text"
-            className="form-control"
-            id="recipientNumber"
-            placeholder="Introduce el número del destinatario"
-            value={recipientNumber}
-            onChange={(e) => setRecipientNumber(e.target.value)}
-          />
-        </div>
+     
+ <div className="mb-3">
+        <label className="form-label">Número de telefono</label>
+        <input
+          type="number"
+        
+          className="form-control"
+          value={numerotelefono}
+             onChange={(e) => setNumeroTelefono(e.target.value)}
+          placeholder="Escribe tu número"
+        />
+      </div>
 
-        <div
-          style={{
-            height: "400px",
-            overflowY: "auto",
-            border: "1px solid #ccc",
-            padding: "10px",
-            borderRadius: "5px",
-          }}
-        >
-          {messages.map((msg, index) => (
-            <div
-              key={index}
-              className={`text-${msg.sender === "user" ? "end" : "start"} mb-2`}
-            >
-              <span
-                className={`d-inline-block px-3 py-2 rounded-pill ${
-                  msg.sender === "user" ? "bg-success text-white" : "bg-light"
-                }`}
-              >
-                {msg.text}
-              </span>
-            </div>
-          ))}
-          {pinVerified &&
-            !chatActive && ( // Mostrar opciones solo cuando el chat esté inactivo
-              <div className="mt-3">
-                {opciones.replies.map((option) => (
-                  <button
-                    key={option.id}
-                    className="btn btn-outline-primary m-1"
-                    onClick={() => handleOptionClick(option.id, option.text)} // Enviar el ID y texto de la opción seleccionada
-                  >
-                    {option.text}
-                  </button>
-                ))}
-                <button
-                  className="btn btn-outline-danger m-1"
-                  onClick={handleCancel} // Botón para cancelar
-                >
-                  Cancelar
-                </button>
-              </div>
-            )}
-        </div>
-
-        {/* Formulario solo habilitado si el chat está activo */}
-        <form onSubmit={handleSubmit} className="input-group mt-3">
-          <input
-            type="text"
-            className="form-control"
-            placeholder="Escribe un mensaje..."
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            required
-            disabled={!chatActive} // Desactivar el input cuando el chat está inactivo
-          />
-          <button
-            type="submit"
-            className="btn btn-success"
-            disabled={!chatActive} // Desactivar el botón de enviar cuando el chat está inactivo
+      <div
+        ref={chatRef}
+        className="border rounded p-3 mb-3 bg-light"
+        style={{ height: '300px', overflowY: 'auto' }}
+      >
+        {messages.map((msg, index) => (
+          <div
+            key={index}
+            className={`d-flex mb-2 ${msg.role === 'user' ? 'justify-content-end' : 'justify-content-start'}`}
           >
-            Enviar
-          </button>
-        </form>
+            <div
+              className={`p-2 rounded ${msg.role === 'user' ? 'bg-primary text-white' : 'bg-white border'}`}
+              style={{ maxWidth: '75%' }}
+            >
+              <div>{msg.content.text}</div>
+              {msg.role === 'bot' && msg.content.buttons?.length > 0 && (
+                <div className="mt-2">
+                  {msg.content.buttons.map((btn, i) => (
+                    <button
+                      key={i}
+                      className="btn btn-outline-secondary btn-sm me-2 mt-1"
+                      onClick={() => handleButtonClick(btn.id, btn.title)}
+                    >
+                      {btn.title}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="input-group">
+        <input
+          className="form-control"
+          type="text"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Escribe un mensaje..."
+        />
+        <button className="btn btn-primary" onClick={handleSend}>
+          Enviar
+        </button>
       </div>
     </div>
   );
 };
 
-export default DummyWhatsappChat;
+export default ChatTest;

@@ -57,16 +57,11 @@ const Sidebar = () => {
           href={sessionStorage.getItem("rol") > 3 ? "/appconductor" : "/app"}
           className="mb-2 border hover-b rounded-3 py-2"
         >
-          Programación <i className="fa-regular fa-pen-to-square"></i>
+          Solicitudes <i className="fa-regular fa-pen-to-square"></i>
         </a>
-
       </div>
       {sessionStorage.getItem("rol") > 3 && (
-        
         <div>
-
- 
-
           <a
             href="/database?base=Misvehiculos"
             className=" border hover-b rounded-3 d-flex flex-column pb-1"
@@ -77,14 +72,26 @@ const Sidebar = () => {
       )}
       {sessionStorage.getItem("rol") == 1 && (
         <div>
-            <div className="d-flex flex-column ">
+          <div className="d-flex flex-column ">
+            <a
+              href="/database?base=Asignaciones"
+              className="mb-2 border hover-b rounded-3 py-2"
+            >
+              Confirmaciones <i class="fa-regular fa-calendar"></i>
+            </a>
+            <a
+              href="/database?base=Cola"
+              className="mb-2 border hover-b rounded-3 py-2"
+            >
+              Turnamiento <i class="fa-regular fa-bookmark"></i>
+            </a>
               <a
-          href="/database?base=Asignaciones"
-          className="mb-2 border hover-b rounded-3 py-2"
-        >
-          Asignaciones <i className="fa-regular fa-pen-to-square"></i>
-        </a>
-              </div>
+              href="/database?base=Recursos"
+              className="mb-2 border hover-b rounded-3 py-2"
+            >
+              Recursos <i class="fa-regular fa-user"></i>
+            </a>
+          </div>
           <h4 className="text-center ">Bases de Datos</h4>
           <div className="d-flex flex-column mt-2 ">
             <a

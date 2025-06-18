@@ -21,6 +21,7 @@ import Compare from "./compare2.jsx";
 import Consult from "./consultarnom.jsx";
 import AppConductor from "./appconductor.jsx";
 import Asignaciones from "./asignaciones.jsx";
+import ChatTest from "./textchat.jsx";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
@@ -39,7 +40,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
         <Route path="/sql" element={<Sqlvehicles />} />
         <Route path="/compare" element={<Compare />} />
         <Route path="/consult" element={<Consult />} />
-
+        <Route path="/chat" element={<ChatTest />} />
       
       </Routes>
     </BrowserRouter>

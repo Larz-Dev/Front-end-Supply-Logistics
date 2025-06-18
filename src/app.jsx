@@ -6,9 +6,10 @@ import { useIsMobile } from "./useIsMobile.jsx"; // ajusta el path
 //import Publicar from "./publicar.jsx";
 import {
   Validarsesion,
-  Actualizar,
   variables,
   Notificar,
+  getEstadoClase,
+  getEstadoTexto,
 } from "./funciones.jsx";
 //import loadingPost from "./assets/images/PostLoading.gif";
 //import loadingProfile from "./assets/images/ProfileLoading.gif";
@@ -74,7 +75,6 @@ function App() {
   const programacionesPorArea = {};
 
   const [areas, setAreas] = useState([]);
-  const [recurso, setRecurso] = useState(null);
 
   useEffect(() => {
     fetch(variables("API") + "/programacion/areas", {
@@ -88,9 +88,6 @@ function App() {
       .then((data) => {
         if (data && Array.isArray(data.areas)) {
           setAreas(data.areas);
-        }
-        if (data && data.recurso) {
-          setRecurso(data.recurso); // recuerda definir recurso con useState
         }
       })
       .catch((err) => {
@@ -117,15 +114,6 @@ function App() {
   });
 
   // Ordenar y asignar numeroDelDia y diaFormateado
-  Object.keys(programacionesPorArea).forEach((area) => {
-    Object.keys(programacionesPorArea[area]).forEach((fecha) => {
-      programacionesPorArea[area][fecha]
-        .sort((a, b) => new Date(a.fechaAsignada) - new Date(b.fechaAsignada))
-        .forEach((prog, index) => {
-          prog.fechaAsignada;
-        });
-    });
-  });
 
   const Cargartodo = () => {
     setTodo(true);
@@ -247,7 +235,7 @@ function App() {
     let estadoactual = estadoProgramacion;
     if (opcion == ">") {
       setEstadoprogramacion(estadoactual + 1);
-      if (estadoProgramacion >= 5) {
+      if (estadoProgramacion >= 8) {
         setEstadoprogramacion(0);
       }
     }
@@ -255,7 +243,7 @@ function App() {
     if (opcion != ">") {
       setEstadoprogramacion(estadoactual - 1);
       if (estadoProgramacion <= 0) {
-        setEstadoprogramacion(5);
+        setEstadoprogramacion(8);
       }
     }
 
@@ -337,39 +325,11 @@ function App() {
                 Atrás
               </button>
               <div
-                className={`btn mx-1  text-nowrap col-4 text-white fw-bold  ${
-                  estadoProgramacion == 0
-                    ? "bg-info"
-                    : estadoProgramacion == 1
-                    ? "bg-primary"
-                    : estadoProgramacion == 2
-                    ? "bg-warning"
-                    : estadoProgramacion == 3
-                    ? "bg-danger"
-                    : estadoProgramacion == 4
-                    ? "bg-success"
-                    : estadoProgramacion == 5
-                    ? "bg-dark"
-                    : estadoProgramacion == 6
-                    ? "bg-danger"
-                    : ""
-                }`}
+                className={`btn mx-1   col-4 text-white fw-bold  ${getEstadoClase(
+                  estadoProgramacion
+                )}`}
               >
-                {estadoProgramacion == 0
-                  ? "Por confirmar"
-                  : estadoProgramacion == 1
-                  ? "En curso"
-                  : estadoProgramacion == 2
-                  ? "Retraso"
-                  : estadoProgramacion == 3
-                  ? "Cancelado"
-                  : estadoProgramacion == 4
-                  ? "Finalizado"
-                  : estadoProgramacion == 5
-                  ? "Todos"
-                  : estadoProgramacion == 6
-                  ? "Cancelado por conductor"
-                  : ""}
+                {getEstadoTexto(estadoProgramacion)}
               </div>
               <button
                 className="btn btn-success col-4"
@@ -411,332 +371,277 @@ function App() {
             </div>
             <p></p>
             <div className="  ">
-              {Object.keys(programacionesPorArea).map((area, areaIdx) => (
-                <div key={areaIdx} className="">
-                  <h3 className="px-2 bg-dark p-0 m-0 text-light pt-2 shadow">
-                    {area}
-                  </h3>
-
-                  {Object.keys(programacionesPorArea[area]).map(
-                    (fecha, fechaIdx) => (
-                      <div key={fechaIdx} className=" ">
-                        <h5 className="text-center  bg-dark bg-secondary text-light py-1  m-0">
-                          {fecha}
-                        </h5>
-                        <div className="table-responsive">
-                          <table className="table table-hover table-dark table-bordered m-0">
-                            <thead className="text-uppercase text-center font-monospace">
-                              <tr>
-                                <th>#</th>
-                                <th>Vehículo</th>
-                                <th>Producto</th>
-                                <th>Cantidad</th>
-                                <th>Fecha/Hora</th>
-                                <th>Estado</th>
-                                <th>Acción</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {programacionesPorArea[area][fecha].map(
-                                (programacion, idx) => (
-                                  <React.Fragment
-                                    key={programacion.idProgramacion}
-                                  >
-                                    <tr
-                                      data-bs-toggle="collapse"
-                                      data-bs-target={`#collapse-${areaIdx}-${fechaIdx}-${idx}`}
-                                      aria-expanded="false"
-                                      className="accordion-toggle text-center"
+              <div className="table-responsive">
+                <table className="table table-hover table-dark table-bordered m-0">
+                  <thead className="text-uppercase text-center font-monospace">
+                    <tr>
+                      <th>#</th>
+                      <th>Área</th>
+                      <th>Tipo</th> {/* Nueva columna */}
+                      <th>Vehículo</th>
+                      <th>Producto</th>
+                      <th>Cantidad</th>
+                      <th>Fecha/Hora</th>
+                      <th>Estado</th>
+                      <th>Acción</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {Object.entries(programacionesPorArea).flatMap(
+                      ([area, fechas], areaIdx) =>
+                        Object.entries(fechas).flatMap(
+                          ([fecha, programaciones], fechaIdx) =>
+                            programaciones.map((programacion, idx) => (
+                              <React.Fragment key={programacion.idProgramacion}>
+                                <tr
+                                  data-bs-toggle="collapse"
+                                  data-bs-target={`#collapse-${areaIdx}-${fechaIdx}-${idx}`}
+                                  aria-expanded="false"
+                                  className="accordion-toggle text-center"
+                                >
+                                  <td>{programacion.numeroDelDia}</td>
+                                  <td>
+                                    {programacion?.area?.nombre ||
+                                      "No asignado"}{" "}
+                                    (
+                                    {programacion?.subareaNombre ||
+                                      "Sin espacio asignado"}
+                                    )
+                                  </td>
+                                  <td>
+                                    <span
+                                      className={`badge fs-6 ${
+                                        programacion.tipo === 0
+                                          ? "bg-primary"
+                                          : programacion.tipo === 1
+                                          ? "bg-success"
+                                          : ""
+                                      }`}
                                     >
-                                      <td>{programacion.numeroDelDia}</td>
-                                      <td>
-                                        {programacion.vehiculo.placa} (
-                                        {programacion.vehiculo.tipo})
-                                      </td>
-                                      <td>{programacion.producto}</td>
-                                      <td>{programacion.cantidad}</td>
-                                      <td>
-                                        <span
-                                          className={`badge fs-6 font-monospace ${
+                                      {programacion.tipo === 0
+                                        ? "Recepción"
+                                        : programacion.tipo === 1
+                                        ? "Despacho"
+                                        : "—"}
+                                    </span>
+                                  </td>
+                                  <td>
+                                    {programacion.vehiculo.placa} (
+                                    {programacion.vehiculo.tipo})
+                                  </td>
+                                  <td>{programacion.producto}</td>
+                                  <td>{programacion.cantidad}</td>
+                                  <td>
+                                    <span
+                                      className={`badge fs-6 font-monospace ${
+                                        programacion.fechaAsignada
+                                          ? "bg-success"
+                                          : "bg-warning text-dark"
+                                      }`}
+                                    >
+                                      {programacion.fechaAsignada
+                                        ? `Asignada: ${new Date(
                                             programacion.fechaAsignada
-                                              ? "bg-success"
-                                              : "bg-warning text-dark"
-                                          }`}
-                                        >
-                                          {programacion.fechaAsignada
-                                            ? `Asignada: ${new Date(
-                                                programacion.fechaAsignada
-                                              )
-                                                .toISOString()
-                                                .slice(0, 16)
-                                                .replace("T", " ")}`
-                                            : `Estimada: ${new Date(
-                                                programacion.fechaEstimadaLlegada
-                                              )
-                                                .toISOString()
-                                                .slice(0, 16)
-                                                .replace("T", " ")}`}
-                                        </span>
-                                      </td>
-                                      <td>
-                                        <span
-                                          className={`badge fs-6 ${
-                                            programacion.estado === 0
-                                              ? "bg-info"
-                                              : programacion.estado === 1
-                                              ? "bg-primary"
-                                              : programacion.estado === 2
-                                              ? "bg-warning"
-                                              : programacion.estado === 3
-                                              ? "bg-danger"
-                                              : programacion.estado === 4
-                                              ? "bg-success"
-                                              : programacion.estado === 6
-                                              ? "bg-danger"
-                                              : ""
-                                          }`}
-                                        >
-                                          {programacion.estado === 0
-                                            ? "Por confirmar"
-                                            : programacion.estado === 1
-                                            ? "En curso"
-                                            : programacion.estado === 2
-                                            ? "Retraso"
-                                            : programacion.estado === 3
-                                            ? "Cancelado"
-                                            : programacion.estado === 4
-                                            ? "Finalizado"
-                                            : programacion.estado === 6
-                                            ? "Cancelado por conductor"
-                                            : ""}
-                                        </span>
-                                      </td>
-                                      <td className="text-center">
-                                        <button className="btn btn-sm btn-light">
-                                          Ver más
-                                        </button>
-                                      </td>
-                                    </tr>
-                                    <tr>
-                                      <td colSpan="7" className="p-0">
-                                        <div
-                                          id={`collapse-${areaIdx}-${fechaIdx}-${idx}`}
-                                          className="collapse bg-light text-dark pt-3 border rounded"
-                                        >
-                                          <div className="container-fluid">
-                                            <div className="row">
-                                              {/* Columna 1 */}
-                                              <div className="col-md-4 mb-1">
-                                                {programacion.fechaAsignada && (
-                                                  <p>
-                                                    <strong>
-                                                      Asignado para:
-                                                    </strong>
-                                                    <br />
-                                                    {new Date(
-                                                      programacion.fechaAsignada
-                                                    )
-                                                      .toISOString()
-                                                      .slice(0, 16)
-                                                      .replace("T", " ")}
-                                                  </p>
-                                                )}
-                                                {programacion.fechaInicioServicio && (
-                                                  <p>
-                                                    <strong>
-                                                      Inicio de servicio:
-                                                    </strong>
-                                                    <br />
-                                                    {new Date(
-                                                      programacion.fechaInicioServicio
-                                                    )
-                                                      .toISOString()
-                                                      .slice(0, 16)
-                                                      .replace("T", " ")}
-                                                  </p>
-                                                )}
-                                                {programacion.fechaFinServicio && (
-                                                  <p>
-                                                    <strong>
-                                                      Fin de servicio:
-                                                    </strong>
-                                                    <br />
-                                                    {new Date(
-                                                      programacion.fechaFinServicio
-                                                    )
-                                                      .toISOString()
-                                                      .slice(0, 16)
-                                                      .replace("T", " ")}
-                                                  </p>
-                                                )}
-                                              </div>
+                                          )
+                                            .toISOString()
+                                            .slice(0, 16)
+                                            .replace("T", " ")}`
+                                        : `Estimada: ${new Date(
+                                            programacion.fechaEstimadaLlegada
+                                          )
+                                            .toISOString()
+                                            .slice(0, 16)
+                                            .replace("T", " ")}`}
+                                    </span>
+                                  </td>
+                                  <td>
+                                    <div
+                                      className={` fs-6 rounded-3 fw-bold  ${getEstadoClase(
+                                        programacion.estado
+                                      )}`}
+                                    >
+                                      <span>
+                                        {getEstadoTexto(programacion.estado)}
+                                      </span>
+                                    </div>
+                                  </td>
+                                  <td className="text-center">
+                                    <button className="btn btn-sm btn-light">
+                                      Ver más
+                                    </button>
+                                  </td>
+                                </tr>
 
-                                              {/* Columna 2 */}
-                                              <div className="col-md-4 mb-1">
-                                                {programacion.contacto && (
-                                                  <p>
-                                                    <strong>Dirección:</strong>
-                                                    <br />
-                                                    {programacion.contacto}
-                                                  </p>
-                                                )}
-                                                {programacion.observaciones && (
-                                                  <p>
-                                                    <strong>
-                                                      Observaciones:
-                                                    </strong>
-                                                    <br />
-                                                    {programacion.observaciones}
-                                                  </p>
-                                                )}
-                                                {programacion.observacionessistema && (
-                                                  <p>
-                                                    <strong>Sistema:</strong>
-                                                    <br />
-                                                    {
-                                                      programacion.observacionessistema
-                                                    }
-                                                  </p>
-                                                )}
-                                              </div>
+                                {/* Fila colapsable */}
+                                <tr>
+                                  <td colSpan="9" className="p-0">
+                                    <div
+                                      id={`collapse-${areaIdx}-${fechaIdx}-${idx}`}
+                                      className="collapse bg-light text-dark pt-3  "
+                                    >
+                                      <div className="container-fluid">
+                                        <div className="row">
+                                          {/* Columna 1 */}
+                                          <div className="col-md-4 mb-1">
+                                            {programacion.fechaAsignada && (
+                                              <p>
+                                                <strong>Asignado para:</strong>
+                                                <br />
+                                                {new Date(
+                                                  programacion.fechaAsignada
+                                                )
+                                                  .toISOString()
+                                                  .slice(0, 16)
+                                                  .replace("T", " ")}
+                                              </p>
+                                            )}
+                                            {programacion.fechaInicioServicio && (
+                                              <p>
+                                                <strong>
+                                                  Inicio de servicio:
+                                                </strong>
+                                                <br />
+                                                {new Date(
+                                                  programacion.fechaInicioServicio
+                                                )
+                                                  .toISOString()
+                                                  .slice(0, 16)
+                                                  .replace("T", " ")}
+                                              </p>
+                                            )}
+                                            {programacion.fechaFinServicio && (
+                                              <p>
+                                                <strong>
+                                                  Fin de servicio:
+                                                </strong>
+                                                <br />
+                                                {new Date(
+                                                  programacion.fechaFinServicio
+                                                )
+                                                  .toISOString()
+                                                  .slice(0, 16)
+                                                  .replace("T", " ")}
+                                              </p>
+                                            )}
+                                          </div>
 
-                                              {/* Columna 3 */}
-                                              <div className="col-md-4 mb-1">
-                                                <p className="mb-1">
-                                                  <strong>Conductor:</strong>
-                                                  <br />
-                                                  {
-                                                    programacion.conductor
-                                                      .Nombre1
-                                                  }{" "}
-                                                  {
-                                                    programacion.conductor
-                                                      .Nombre2
-                                                  }{" "}
-                                                  {
-                                                    programacion.conductor
-                                                      .Apellido1
-                                                  }{" "}
-                                                  {
-                                                    programacion.conductor
-                                                      .Apellido2
-                                                  }
-                                                  <br />
-                                                  <small className="text-muted">
-                                                    (
-                                                    {
-                                                      programacion.conductor
-                                                        .phone
-                                                    }
-                                                    )
-                                                  </small>
-                                                </p>
-                                                <p className="mb-1">
-                                                  <strong>
-                                                    Transportadora:
-                                                  </strong>
-                                                  <br />
-                                                  {programacion.conductor
-                                                    .transportadora?.nombre ||
-                                                    programacion.conductor
-                                                      ?.transportadorasugerida +
-                                                      " (Sugerida)"}
-                                                </p>
-                                                {programacion.confirmador
-                                                  ?.user && (
-                                                  <p className="badge bg-primary fs-6">
-                                                    <strong>
-                                                      Confirmador:
-                                                    </strong>
-                                                    <br />
-                                                    {programacion.confirmador
-                                                      .user +
-                                                      " (" +
-                                                      programacion.confirmador
-                                                        .documento +
-                                                      ")"}
-                                                  </p>
-                                                )}
-                                              </div>
-                                            </div>
+                                          {/* Columna 2 */}
+                                          <div className="col-md-4 mb-1">
+                                            {programacion.contacto && (
+                                              <p>
+                                                <strong>Dirección:</strong>
+                                                <br />
+                                                {programacion.contacto}
+                                              </p>
+                                            )}
+                                            {programacion.observaciones && (
+                                              <p>
+                                                <strong>Observaciones:</strong>
+                                                <br />
+                                                {programacion.observaciones}
+                                              </p>
+                                            )}
+                                            {programacion.observacionessistema && (
+                                              <p>
+                                                <strong>Sistema:</strong>
+                                                <br />
+                                                {
+                                                  programacion.observacionessistema
+                                                }
+                                              </p>
+                                            )}
+                                          </div>
 
-                                            {/* Botones de acción */}
-                                            <div className="text-end mt-1">
-                                              {!programacion.fechaFinServicio &&
-                                                !programacion.fechaInicioServicio &&
-                                                programacion.estado !== 3 && (
-                                                  <>
-                                                    {programacion.estado ===
-                                                      0 && (
-                                                      <a
-                                                        className="btn btn-primary fw-bold text-white me-2 mb-2"
-                                                        data-bs-toggle="modal"
-                                                        data-bs-target="#finishPostModal"
-                                                        onClick={() =>
-                                                          handleclose(
-                                                            programacion
-                                                          )
-                                                        }
-                                                      >
-                                                        Confirmar solicitud
-                                                      </a>
-                                                    )}
-                                                    {(programacion.estado ===
-                                                      1 ||
-                                                      programacion.estado ===
-                                                        2) && (
-                                                      <a
-                                                        className="btn bg-supply fw-bold text-white me-2 mb-2"
-                                                        data-bs-toggle="modal"
-                                                        data-bs-target="#finishPostModal"
-                                                        onClick={() =>
-                                                          handleclose(
-                                                            programacion
-                                                          )
-                                                        }
-                                                      >
-                                                        Finalizar
-                                                      </a>
-                                                    )}
-                                                  </>
-                                                )}
-                                              {!programacion.fechaFinServicio &&
-                                                !programacion.fechaInicioServicio &&
-                                                (programacion.estado === 1 ||
-                                                  programacion.estado ===
-                                                    2) && (
-                                                  <button
-                                                    className="btn btn-primary me-2 mb-2"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#finishPostModal"
-                                                    onClick={() =>
-                                                      handleclose(programacion)
-                                                    }
-                                                  >
-                                                    Observación
-                                                  </button>
-                                                )}
-                                            </div>
+                                          {/* Columna 3 */}
+                                          <div className="col-md-4 mb-1">
+                                            <p className="mb-1">
+                                              <strong>Conductor:</strong>
+                                              <br />
+                                              {
+                                                programacion.conductor.Nombre1
+                                              }{" "}
+                                              {programacion.conductor.Nombre2}{" "}
+                                              {programacion.conductor.Apellido1}{" "}
+                                              {programacion.conductor.Apellido2}
+                                              <br />
+                                              <small className="text-muted">
+                                                ({programacion.conductor.phone})
+                                              </small>
+                                            </p>
+                                            <p className="mb-1">
+                                              <strong>Transportadora:</strong>
+                                              <br />
+                                              {programacion.conductor
+                                                .transportadora?.nombre ||
+                                                programacion.conductor
+                                                  .transportadorasugerida +
+                                                  " (Sugerida)"}
+                                            </p>
+                                            {programacion.confirmador?.user && (
+                                              <p className="badge bg-primary fs-6">
+                                                <strong>Confirmador:</strong>
+                                                <br />
+                                                {programacion.confirmador.user +
+                                                  " (" +
+                                                  programacion.confirmador
+                                                    .documento +
+                                                  ")"}
+                                              </p>
+                                            )}
                                           </div>
                                         </div>
-                                      </td>
-                                    </tr>
-                                  </React.Fragment>
-                                )
-                              )}
-                            </tbody>
-                          </table>
-                        </div>
-                      </div>
-                    )
-                  )}
-                  <div className=" text-white fs-3 fw-bold  text-center bg-dark">
-                    <div className="btn rounded-0 p-0 bg-supply d-block pt-1">
-                      {" "}
-                    </div>
-                  </div>
-                </div>
-              ))}
+
+                                        {/* Botones */}
+                                        <div className="text-end mt-1">
+                                          {!programacion.fechaFinServicio &&
+                                            !programacion.fechaInicioServicio &&
+                                            programacion.estado !== 3 && (
+                                              <>
+                                                {programacion.estado === 0 && (
+                                                  <div>
+                                                    <a
+                                                      className="btn btn-primary fw-bold text-white me-2 mb-2"
+                                                      data-bs-toggle="modal"
+                                                      data-bs-target="#finishPostModal"
+                                                      onClick={() =>
+                                                        handleclose(
+                                                          programacion
+                                                        )
+                                                      }
+                                                    >
+                                                      Gestionar solicitud
+                                                    </a>
+                                                  </div>
+                                                )}
+                                              </>
+                                            )}
+                                          {!programacion.fechaFinServicio &&
+                                            !programacion.fechaInicioServicio &&
+                                            (programacion.estado === 1 ||
+                                              programacion.estado === 2) && (
+                                              <button
+                                                className="btn btn-primary me-2 mb-2"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#finishPostModal"
+                                                onClick={() =>
+                                                  handleclose(programacion)
+                                                }
+                                              >
+                                                Observación
+                                              </button>
+                                            )}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </td>
+                                </tr>
+                              </React.Fragment>
+                            ))
+                        )
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
             {totalPages > 1 && (
               <nav className="d-flex justify-content-center mt-4">
@@ -812,109 +717,63 @@ function App() {
 
             <div className="p-3 bor">
               {/* Mostrar solo si estado es 0 */}
-           {selectedprogramm.estado === 0 && (
-  <div>
-    {/* Resumen arriba */}
-   
+              {selectedprogramm.estado === 0 && (
+                <div>
+                  {/* Resumen arriba */}
 
-    <h4 className="mb-3">Confirmar solicitud</h4>
-    <div className="mb-3">
-      <label htmlFor="asignarArea" className="form-label">
-        Asignar área
-      </label>
-      <select
-        id="asignarArea"
-        className="form-select"
-        value={areaAsignada}
-        onChange={(e) => setAreaAsignada(e.target.value)}
-      >
-        <option value="">Selecciona un área...</option>
-        {areas.map((area) => (
-          <option key={area.idArea} value={area.idArea}>
-            {area.nombre}
-          </option>
-        ))}
-      </select>
+                  <h4 className="mb-3">Confirmar solicitud</h4>
+                  <div className="mb-3">
+                    <label htmlFor="asignarArea" className="form-label">
+                      Asignar área
+                    </label>
+                    {selectedprogramm.tipo !== undefined && (
+                      <select
+                        id="asignarArea"
+                        className="form-select"
+                        value={areaAsignada}
+                        onChange={(e) => setAreaAsignada(e.target.value)}
+                      >
+                        <option value="">Selecciona un área...</option>
+                        {areas
+                          .filter((area) => area.tipo == selectedprogramm.tipo)
+                          .map((area) => (
+                            <option key={area.idArea} value={area.idArea}>
+                              {area.nombre}
+                            </option>
+                          ))}
+                      </select>
+                    )}
 
-      <label htmlFor="asignarFecha" className="form-label mt-3">
-        Asignar fecha
-      </label>
-      <input
-        type="datetime-local"
-        id="asignarFecha"
-        className="form-control"
-        value={fechaAsignada}
-        onChange={(e) => setFechaAsignada(e.target.value)}
-      />
+                    <label htmlFor="asignarFecha" className="form-label mt-3">
+                      Asignar fecha (Sugerida por conductor:{" "}
+                      {new Date(selectedprogramm.fechaEstimadaLlegada)
+                        .toISOString()
+                        .slice(0, 16)
+                        .replace("T", " ")}
+                      )
+                    </label>
+                    <input
+                      type="datetime-local"
+                      id="asignarFecha"
+                      className="form-control"
+                      value={fechaAsignada}
+                      onChange={(e) => setFechaAsignada(e.target.value)}
+                    />
 
-<br />
+                    <label className="form-label mt-3">
+                      Observación (En caso de declinar)
+                    </label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      value={observacion}
+                      onChange={(e) => setObservacion(e.target.value)}
+                    />
 
-<div className="table-responsive shadow-sm">
-  <table className="table table-bordered align-middle text-center">
-    <thead className="table-light">
-      <tr>
-        <th>Recurso</th>
-        <th>Total</th>
-        <th>Disponibles</th>
-        <th>Asignar</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>Áreas registradas</td>
-        <td>{areas.length}</td>
-        <td>{areas.filter((a) => a.programacionActual !== null).length}</td>
-        <td>-</td>
-      </tr>
-      <tr>
-        <td>Montacargas</td>
-        <td>{recurso.totalMontacargas}</td>
-        <td>{recurso.montacargasActuales - (Montacargas || 0)} <i className="fas fa-truck text-primary"></i></td>
-        <td style={{ width: "100px" }}>
-          <input
-            type="number"
-            min={0}
-            max={recurso.montacargasActuales}
-            value={Montacargas}
-            onChange={(e) => {
-              let val = Number(e.target.value);
-              if (val > recurso.montacargasActuales) val = recurso.montacargasActuales;
-              if (val < 0) val = 0;
-              setMontacargas(val);
-            }}
-            className="form-control form-control-sm"
-          />
-        </td>
-      </tr>
-      <tr>
-        <td>Auxiliares</td>
-        <td>{recurso.totalAuxiliares}</td>
-        <td>{recurso.auxiliaresActuales - (Auxiliares || 0)} <i className="fas fa-user text-info"></i></td>
-        <td style={{ width: "100px" }}>
-          <input
-            type="number"
-            min={0}
-            max={recurso.auxiliaresActuales}
-            value={Auxiliares}
-            onChange={(e) => {
-              let val = Number(e.target.value);
-              if (val > recurso.auxiliaresActuales) val = recurso.auxiliaresActuales;
-              if (val < 0) val = 0;
-              setAuxiliares(val);
-            }}
-            className="form-control form-control-sm"
-          />
-        </td>
-      </tr>
-    </tbody>
-  </table>
-</div>
-
-    </div>
-    
-  </div>
-)}
-
+                    <br />
+                  </div>
+                </div>
+              )}
 
               {/* Mostrar solo si estado es 1 o 2 */}
               {(selectedprogramm.estado === 1 ||
@@ -933,45 +792,22 @@ function App() {
                     </div>
 
                     <div
-                      className={`card-footer text-white fw-bold ${
-                        selectedprogramm.estado === 0
-                          ? "bg-info"
-                          : selectedprogramm.estado === 1
-                          ? "bg-primary"
-                          : selectedprogramm.estado === 2
-                          ? "bg-warning"
-                          : selectedprogramm.estado === 3
-                          ? "bg-danger"
-                          : selectedprogramm.estado === 4
-                          ? "bg-success"
-                          : selectedprogramm.estado === 6
-                          ? "bg-danger"
-                          : ""
-                      }`}
+                      className={`card-footer text-white fw-bold ${getEstadoClase(
+                        selectedprogramm.estado
+                      )}`}
                     >
-                      {selectedprogramm.estado === 0
-                        ? "Solicitud enviada"
-                        : selectedprogramm.estado === 1
-                        ? "En curso"
-                        : selectedprogramm.estado === 2
-                        ? "Retraso"
-                        : selectedprogramm.estado === 3
-                        ? "Cancelado"
-                        : selectedprogramm.estado === 4
-                        ? "Finalizado"
-                        : selectedprogramm.estado == 6
-                        ? "Cancelado por conductor"
-                        : ""}
+                      {getEstadoTexto(selectedprogramm.estado)}
                     </div>
 
                     <div className="card-body">
-                      <h2 className="card-title text-secondary">
-                        {selectedprogramm.producto} -{" "}
-                        <span className="text-muted">
-                          {" "}
-                          {selectedprogramm.cantidad}
-                        </span>
-                      </h2>
+                      {selectedprogramm?.tipo == 0 && (
+                        <h2 className="card-title text-secondary">
+                          {selectedprogramm.producto} -{" "}
+                          <span className="text-muted">
+                            {selectedprogramm.cantidad}
+                          </span>
+                        </h2>
+                      )}
 
                       <p className="card-text mb-1">
                         <strong>Vehículo:</strong>{" "}
@@ -1062,14 +898,6 @@ function App() {
                           <option value="Finalizado">Finalizar</option>
                           <option value="Cancelado">Cancelar</option>
                         </select>
-
-                        <label className="form-label mt-3">Observación</label>
-                        <input
-                          type="text"
-                          className="form-control"
-                          value={observacion}
-                          onChange={(e) => setObservacion(e.target.value)}
-                        />
                       </div>
                     </div>
                   </div>
@@ -1087,7 +915,51 @@ function App() {
               </button>
               <button
                 type="button"
-                className="btn bg-supply text-white"
+                className="btn btn-danger"
+                onClick={() => {
+                  fetch(variables("API") + `/programacion/declinate`, {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                      Authorization: `Bearer ${sessionStorage.getItem(
+                        "token"
+                      )}`,
+                    },
+                    body: JSON.stringify({
+                      idProgramacion: selectedprogramm.idProgramacion,
+                      estado: 3, // Código para "Declinado"
+                      observacionessistema:
+                        observacion ||
+                        "Solicitud declinada por el administrador",
+                    }),
+                  })
+                    .then((response) => response.json())
+                    .then((data) => {
+                      Notificar(data.mensaje, data.status, "normal");
+                      setprogramm([]);
+                      FetchProgramaciones();
+                      document
+                        .getElementById("finishPostModal")
+                        .classList.remove("show");
+                      document
+                        .getElementById("finishPostModal")
+                        .setAttribute("aria-hidden", "true");
+                      document.querySelector(".modal-backdrop").remove();
+                    })
+                    .catch((error) => {
+                      Notificar(
+                        "No se ha podido establecer conexión con el servidor",
+                        "error",
+                        "normal"
+                      );
+                    });
+                }}
+              >
+                Declinar solicitud
+              </button>
+              <button
+                type="button"
+                className="btn bg-warning"
                 onClick={() => {
                   // Send POST request to delete the post
                   if (
@@ -1189,8 +1061,7 @@ function App() {
                             idProgramacion: selectedprogramm.idProgramacion,
                             fechaAsignada: fechaAsignada,
                             idArea: areaAsignada,
-                            montacargasAsignados: Montacargas,
-                            auxiliaresAsignados: Auxiliares,
+
                             idUsuario: sessionStorage.getItem("idUsuario"),
                           }),
                         })
@@ -1227,9 +1098,9 @@ function App() {
                   }
                 }}
               >
-                {selectedprogramm.estado === 0
+                {selectedprogramm.estado == 0
                   ? "Confirmar solicitud"
-                  : selectedprogramm.estado === 1
+                  : selectedprogramm.estado == 1 || 2
                   ? "Finzalizar"
                   : ""}
               </button>

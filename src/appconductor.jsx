@@ -10,11 +10,14 @@ import {
   Actualizar,
   variables,
   Notificar,
+  getEstadoClase,
+  getEstadoTexto,
 } from "./funciones.jsx";
 
 import Sidebar from "./sidebar.jsx";
 
-import CrearProgramacion from "./crearprogramacion.jsx";
+import CrearProgramacion from "./generarsolicitudrecepcion.jsx";
+import GenerarSolicitudDespacho from "./generarsolicituddespacho.jsx";
 function App() {
   Validarsesion();
   document.body.style = "background: #dee2e6;";
@@ -89,7 +92,7 @@ function App() {
 
   // Agrupar por área y luego por fecha (formateada como YYYY-MM-DD)
   filteredProgramaciones.forEach((prog) => {
-    const area = prog.area.nombre || "Sin área";
+    const area = prog.area?.nombre;
     const fecha = new Date(prog.fechaAsignada || prog.fechaEstimadaLlegada)
       .toISOString()
       .split("T")[0]; // YYYY-MM-DD
@@ -120,15 +123,15 @@ function App() {
     let estadoactual = estadoProgramacion;
     if (opcion == ">") {
       setEstadoprogramacion(estadoactual + 1);
-      if (estadoProgramacion >= 6) {
+      if (estadoProgramacion > 8) {
         setEstadoprogramacion(0);
       }
     }
 
     if (opcion != ">") {
       setEstadoprogramacion(estadoactual - 1);
-      if (estadoProgramacion <= 0) {
-        setEstadoprogramacion(6);
+      if (estadoProgramacion < 0) {
+        setEstadoprogramacion(8);
       }
     }
 
@@ -218,7 +221,7 @@ function App() {
       return horaA - horaB;
     })
     .reduce((acc, prog) => {
-      const area = prog.area.nombre || "Sin asignar";
+      const area = "En construcción";
       if (!acc[area]) acc[area] = [];
       acc[area].push(prog);
       return acc;
@@ -244,7 +247,7 @@ function App() {
           >
             <Sidebar />
             <Cabecera />
-            {!isMobile }
+            {!isMobile}
           </div>
         )}
 
@@ -282,6 +285,7 @@ function App() {
                 />
 
                 <CrearProgramacion onCreated={() => fetchProgramaciones()} />
+                   <GenerarSolicitudDespacho onCreated={() => fetchProgramaciones()} />
                 <button
                   className="btn btn-warning col-md-2 mx-1 "
                   onClick={() => {
@@ -301,39 +305,11 @@ function App() {
                   Atrás
                 </button>
                 <div
-                  className={`btn mx-1  text-nowrap col-4 text-white fw-bold  ${
-                    estadoProgramacion == 0
-                      ? "bg-info"
-                      : estadoProgramacion == 1
-                      ? "bg-primary"
-                      : estadoProgramacion == 2
-                      ? "bg-warning"
-                      : estadoProgramacion == 3
-                      ? "bg-danger"
-                      : estadoProgramacion == 4
-                      ? "bg-success"
-                      : estadoProgramacion == 5
-                      ? "bg-dark"
-                      : estadoProgramacion == 6
-                      ? "bg-danger"
-                      : ""
-                  }`}
+                  className={`btn mx-1  text-nowrap col-4 text-white fw-bold  ${getEstadoClase(
+                    estadoProgramacion
+                  )}`}
                 >
-                  {estadoProgramacion == 0
-                    ? "Por confirmar"
-                    : estadoProgramacion == 1
-                    ? "En curso"
-                    : estadoProgramacion == 2
-                    ? "Retraso"
-                    : estadoProgramacion == 3
-                    ? "Cancelado"
-                    : estadoProgramacion == 4
-                    ? "Finalizado"
-                    : estadoProgramacion == 5
-                    ? "Todos"
-                    : estadoProgramacion == 6
-                    ? "Cancelado por conductor"
-                    : ""}
+                  {getEstadoTexto(estadoProgramacion)}
                 </div>
                 <button
                   className="btn btn-success col-4"
@@ -388,33 +364,28 @@ function App() {
                   });
 
                   return (
-                    <div key={areaIdx} className="">
-                      <h3 className="px-2 bg-dark p-0 m-0 text-light pt-2 shadow">
-                        {area}
-                      </h3>
-
-                      {Object.keys(programacionesPorFecha).map(
-                        (fecha, fechaIdx) => (
-                          <div key={fechaIdx} className="">
-                            <h5 className="text-center  bg-dark bg-secondary text-light py-1  m-0">
-                              {fecha}
-                            </h5>
-                            <div className="table-responsive ">
-                              <table className="table table-hover table-dark table-bordered m-0">
-                                <thead className="text-uppercase text-center font-monospace">
-                                  <tr>
-                                    <th>#</th>
-                                    <th>Vehículo</th>
-                                    <th>Producto</th>
-                                    <th>Cantidad</th>
-                                    <th>Fecha/Hora</th>
-                                    <th>Estado</th>
-                                    <th>Acción</th>
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                  {programacionesPorFecha[fecha].map(
-                                    (programacion, idx) => (
+                    <div className="">
+                      <div className="table-responsive">
+                        <table className="table table-hover table-dark table-bordered m-0">
+                          <thead className="text-uppercase text-center font-monospace">
+                            <tr>
+                              <th>#</th>
+                              <th>Área</th>
+                              <th>Tipo</th> {/* Nueva columna */}
+                              <th>Vehículo</th>
+                              <th>Producto</th>
+                              <th>Cantidad</th>
+                              <th>Fecha/Hora</th>
+                              <th>Estado</th>
+                              <th>Acción</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {Object.entries(programacionesPorArea).flatMap(
+                              ([area, fechas], areaIdx) =>
+                                Object.entries(fechas).flatMap(
+                                  ([fecha, programaciones], fechaIdx) =>
+                                    programaciones.map((programacion, idx) => (
                                       <React.Fragment
                                         key={programacion.idProgramacion}
                                       >
@@ -425,6 +396,27 @@ function App() {
                                           className="accordion-toggle text-center"
                                         >
                                           <td>{programacion.numeroDelDia}</td>
+                                          <td>
+                                    {programacion?.area?.nombre ||
+                                      "No asignado"} ({( programacion?.subareaNombre||"Sin espacio asignado")})
+                                  </td>
+                                          <td>
+                                            <span
+                                              className={`badge fs-6 ${
+                                                programacion.tipo === 0
+                                                  ? "bg-primary"
+                                                  : programacion.tipo === 1
+                                                  ? "bg-success"
+                                                  : ""
+                                              }`}
+                                            >
+                                              {programacion.tipo === 0
+                                                ? "Recepción"
+                                                : programacion.tipo === 1
+                                                ? "Despacho"
+                                                : "—"}
+                                            </span>
+                                          </td>
                                           <td>
                                             {programacion.vehiculo.placa} (
                                             {programacion.vehiculo.tipo})
@@ -455,37 +447,12 @@ function App() {
                                             </span>
                                           </td>
                                           <td>
-                                            <span
-                                              className={`badge fs-6 ${
-                                                programacion.estado === 0
-                                                  ? "bg-info"
-                                                  : programacion.estado === 1
-                                                  ? "bg-primary"
-                                                  : programacion.estado === 2
-                                                  ? "bg-warning"
-                                                  : programacion.estado === 3
-                                                  ? "bg-danger"
-                                                  : programacion.estado === 4
-                                                  ? "bg-success"
-                                                  : programacion.estado == 6
-                                                  ? "bg-danger"
-                                                  : ""
-                                              }`}
-                                            >
-                                              {programacion.estado === 0
-                                                ? "Por confirmar"
-                                                : programacion.estado === 1
-                                                ? "En curso"
-                                                : programacion.estado === 2
-                                                ? "Retraso"
-                                                : programacion.estado === 3
-                                                ? "Cancelado"
-                                                : programacion.estado === 4
-                                                ? "Finalizado"
-                                                : programacion.estado == 6
-                                                ? "Cancelado por conductor"
-                                                : ""}
-                                            </span>
+                                                <div className={` fs-6 rounded-3 fw-bold  ${getEstadoClase(programacion.estado)}`}>
+                                                                                 <span>
+                                                                                
+                                                                                   {getEstadoTexto(programacion.estado)}
+                                                                                 </span>
+                                                                               </div>
                                           </td>
                                           <td className="text-center">
                                             <button className="btn btn-sm btn-light">
@@ -493,11 +460,12 @@ function App() {
                                             </button>
                                           </td>
                                         </tr>
+                                        {/* Detalles colapsables */}
                                         <tr>
-                                          <td colSpan="7" className="p-0">
+                                          <td colSpan="9" className="p-0">
                                             <div
                                               id={`collapse-${areaIdx}-${fechaIdx}-${idx}`}
-                                              className="collapse bg-light text-dark pt-3 border rounded"
+                                              className="collapse bg-light text-dark pt-3 "
                                             >
                                               <div className="container-fluid">
                                                 <div className="row">
@@ -545,6 +513,7 @@ function App() {
                                                       </p>
                                                     )}
                                                   </div>
+
                                                   <div className="col-md-4 mb-1">
                                                     {programacion.contacto && (
                                                       <p>
@@ -578,6 +547,7 @@ function App() {
                                                       </p>
                                                     )}
                                                   </div>
+
                                                   <div className="col-md-4 mb-1">
                                                     <p className="mb-1">
                                                       <strong>
@@ -619,7 +589,7 @@ function App() {
                                                         .transportadora
                                                         ?.nombre ||
                                                         programacion.conductor
-                                                          ?.transportadorasugerida +
+                                                          .transportadorasugerida +
                                                           " (Sugerida)"}
                                                     </p>
                                                     {programacion.confirmador
@@ -640,6 +610,7 @@ function App() {
                                                     )}
                                                   </div>
                                                 </div>
+
                                                 <div className="text-end mt-1">
                                                   {!programacion.fechaFinServicio &&
                                                     !programacion.fechaInicioServicio &&
@@ -666,7 +637,7 @@ function App() {
                                                   {!programacion.fechaFinServicio &&
                                                     !programacion.fechaInicioServicio &&
                                                     (programacion.estado ===
-                                                      1 ||
+                                                      7 ||
                                                       programacion.estado ===
                                                         2) && (
                                                       <button
@@ -688,19 +659,14 @@ function App() {
                                           </td>
                                         </tr>
                                       </React.Fragment>
-                                    )
-                                  )}
-                                </tbody>
-                              </table>
-                            </div>
-                          </div>
-                        )
-                      )}
-                      <div className=" text-white fs-3 fw-bold  text-center bg-dark">
-                        <div className="btn rounded-0 p-0 bg-supply d-block pt-1">
-                          {" "}
-                        </div>
+                                    ))
+                                )
+                            )}
+                          </tbody>
+                        </table>
                       </div>
+
+                      <div className=" text-white fs-3 fw-bold  text-center bg-dark"></div>
                     </div>
                   );
                 })}
@@ -786,7 +752,7 @@ function App() {
                 {" "}
                 <span className=" text-mute fs-6">
                   (Esta será notificada a administradores)
-                </span>
+                </span  >
               </p>
             </div>
 
@@ -801,43 +767,21 @@ function App() {
                       </h5>
                     </div>
                     <div
-                      className={`card-footer text-white fw-bold  ${
-                        selectedprogramm.estado == 0
-                          ? "bg-primary"
-                          : selectedprogramm.estado == 1
-                          ? "bg-warning "
-                          : selectedprogramm.estado == 2
-                          ? "bg-warning "
-                          : selectedprogramm.estado == 3
-                          ? "bg-danger "
-                          : selectedprogramm.estado == 4
-                          ? "bg-success "
-                          : selectedprogramm.estado == 6
-                          ? "Cancelado por conductor"
-                          : ""
-                      }`}
+                      className={`card-footer text-white fw-bold  ${getEstadoClase(
+                        selectedprogramm.estado
+                      )}`}
                     >
-                      {selectedprogramm.estado == 0
-                        ? "Solicitud enviada"
-                        : selectedprogramm.estado == 1
-                        ? "En curso"
-                        : selectedprogramm.estado == 2
-                        ? "Retraso"
-                        : selectedprogramm.estado == 3
-                        ? "Cancelado"
-                        : selectedprogramm.estado == 4
-                        ? "Finalizado"
-                        : selectedprogramm.estado == 6
-                        ? "Cancelado por conductor"
-                        : ""}
+                      {getEstadoTexto(selectedprogramm.estado)}
                     </div>
                     <div className="card-body">
-                      <h2 className="card-title text-secondary">
-                        {selectedprogramm.producto} -{" "}
-                        <span className="text-muted">
-                          {selectedprogramm.cantidad}
-                        </span>
-                      </h2>
+                      {selectedprogramm?.tipo == 0 && (
+                        <h2 className="card-title text-secondary">
+                          {selectedprogramm.producto} -{" "}
+                          <span className="text-muted">
+                            {selectedprogramm.cantidad}
+                          </span>
+                        </h2>
+                      )}
 
                       <p className="card-text mb-1">
                         <strong>Vehículo:</strong>{" "}
@@ -855,8 +799,7 @@ function App() {
                               .replace("T", " ")}
                           </p>
                           <p className="card-text mb-1">
-                            <strong>Área asignada:</strong>{" "}
-                            {selectedprogramm.area}
+                            <strong>Área asignada:</strong> En construcción
                           </p>
                         </div>
                       ) : (
@@ -953,13 +896,13 @@ function App() {
                 Atrás
               </button>
 
-              {selectedprogramm.estado == 1 && (
+              {selectedprogramm.estado == 7 && (
                 <button
                   type="button"
                   className="btn bg-warning text-white"
                   onClick={() => {
                     fetch(
-                      variables("API") + `/programacion/estadobyconductor`,
+                      variables("API") + `/programacion/retrasobyConductor`,
                       {
                         method: "POST", // Specify the method if needed (GET is default)
                         headers: {
@@ -970,7 +913,6 @@ function App() {
                         },
                         body: JSON.stringify({
                           idProgramacion: selectedprogramm.idProgramacion,
-                          estado: 2,
                         }),
                       }
                     )
@@ -1109,44 +1051,21 @@ function App() {
                       </h5>
                     </div>
                     <div
-                      className={`card-footer text-white fw-bold  ${
-                        selectedprogramm.estado == 0
-                          ? "bg-primary"
-                          : selectedprogramm.estado == 1
-                          ? "bg-warning "
-                          : selectedprogramm.estado == 2
-                          ? "bg-warning "
-                          : selectedprogramm.estado == 3
-                          ? "bg-danger "
-                          : selectedprogramm.estado == 4
-                          ? "bg-success "
-                          : selectedprogramm.estado == 6
-                          ? "bg-danger"
-                          : ""
-                      }`}
+                      className={`card-footer text-white fw-bold  ${getEstadoClase(
+                        selectedprogramm.estado
+                      )}`}
                     >
-                      {selectedprogramm.estado == 0
-                        ? "Solicitud enviada"
-                        : selectedprogramm.estado == 1
-                        ? "En curso"
-                        : selectedprogramm.estado == 2
-                        ? "Retraso"
-                        : selectedprogramm.estado == 3
-                        ? "Cancelado"
-                        : selectedprogramm.estado == 4
-                        ? "Finalizado"
-                        : selectedprogramm.estado == 6
-                        ? "Cancelado por conductor"
-                        : ""}
+                      {getEstadoTexto(selectedprogramm.estado)}
                     </div>
                     <div className="card-body">
-                      <h2 className="card-title text-secondary">
-                        {selectedprogramm.producto} -{" "}
-                        <span className="text-muted">
-                          {selectedprogramm.cantidad}
-                        </span>
-                      </h2>
-
+                      {selectedprogramm.tipo == 0 && (
+                        <h2 className="card-title text-secondary">
+                          {selectedprogramm.producto} -{" "}
+                          <span className="text-muted">
+                            {selectedprogramm.cantidad}
+                          </span>
+                        </h2>
+                      )}
                       <p className="card-text mb-1">
                         <strong>Vehículo:</strong>{" "}
                         {selectedprogramm.vehiculo?.placa} (
@@ -1165,8 +1084,7 @@ function App() {
                               : "Sin fecha estimada"}
                           </p>
                           <p className="card-text mb-1">
-                            <strong>Área asignada:</strong>{" "}
-                            {selectedprogramm.area}
+                            <strong>Área asignada:</strong> En construcción
                           </p>
                         </div>
                       ) : (
@@ -1203,12 +1121,12 @@ function App() {
                     </div>
                     <div className="card-footer text-muted">
                       Programado el{" "}
-                       {selectedprogramm.createdAt
-                            ? new Date(selectedprogramm.createdAt)
-                                .toISOString()
-                                .slice(0, 16)
-                                .replace("T", " ")
-                            : "Sin fecha estimada"}
+                      {selectedprogramm.createdAt
+                        ? new Date(selectedprogramm.createdAt)
+                            .toISOString()
+                            .slice(0, 16)
+                            .replace("T", " ")
+                        : "Sin fecha estimada"}
                     </div>
                     {selectedprogramm.observaciones && (
                       <div className="card-footer text-muted">
@@ -1245,7 +1163,7 @@ function App() {
                 Atrás
               </button>
 
-              {selectedprogramm.estado == 1 && (
+              {selectedprogramm.estado == 7 && (
                 <button
                   type="button"
                   className="btn bg-warning text-white"
@@ -1293,7 +1211,7 @@ function App() {
                 </button>
               )}
 
-              {selectedprogramm.estado && (
+              {selectedprogramm.estado == 0 && (
                 <button
                   type="button"
                   className="btn bg-danger text-white"

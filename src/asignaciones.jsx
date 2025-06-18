@@ -1,229 +1,307 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { variables, Notificar } from "./funciones";
 
-const Asignaciones = () => {
-  const [areas, setAreas] = useState([]);
-  const [resumen, setResumen] = useState(null);
-  const [collapseOpen, setCollapseOpen] = useState({});
+const ColaProgramaciones = () => {
+  const [programacionesPorArea, setProgramacionesPorArea] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [programacionSeleccionada, setProgramacionSeleccionada] =
+    useState(null);
+  const [subareas, setSubareas] = useState([]);
+  const [subareaSeleccionada, setSubareaSeleccionada] = useState("");
 
   useEffect(() => {
-    fetchAreasConProgramacion();
+    fetchColaProgramaciones();
   }, []);
 
-  const fetchAreasConProgramacion = async () => {
+  const fetchColaProgramaciones = async () => {
     setLoading(true);
     try {
-      const res = await fetch(
-        variables("API") + "/programacion/areasandprogramacion",
-        {
-          headers: {
-            Authorization: `Bearer ${sessionStorage.getItem("token")}`,
-          },
-        }
-      );
-      if (!res.ok) throw new Error("Error al obtener áreas y programaciones");
+      const res = await fetch(variables("API") + "/programacion/Cola", {
+        headers: {
+          Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+        },
+      });
+      if (!res.ok)
+        throw new Error("Error al obtener la cola de programaciones");
       const data = await res.json();
-
-      const { areas, recurso, totalAreas, areasConProgramacionActual } = data;
-      setAreas(areas);
-      setResumen({ recurso, totalAreas, areasConProgramacionActual });
+      setProgramacionesPorArea(data.programacionesPorArea || []);
     } catch (error) {
       Notificar(error.message, "error", "normal");
     }
     setLoading(false);
   };
 
-  const toggleCollapse = (idArea) => {
-    setCollapseOpen((prev) => ({
-      ...prev,
-      [idArea]: !prev[idArea],
-    }));
+  const abrirModal = async (programacion) => {
+    setProgramacionSeleccionada(programacion);
+    setSubareaSeleccionada("");
+
+    if (!programacion?.idArea) return;
+
+    try {
+      const res = await fetch(
+        variables("API") + "/programacion/listarsubareas",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+          },
+          body: JSON.stringify({ idArea: programacion.idArea }),
+        }
+      );
+
+      const data = await res.json();
+      if (data.status !== "success") throw new Error(data.mensaje);
+      setSubareas(data.subareas || []);
+    } catch (error) {
+      Notificar(
+        "Error al cargar subáreas: " + error.message,
+        "error",
+        "normal"
+      );
+    }
+  };
+
+  const añadirACola = async () => {
+    if (!subareaSeleccionada || !programacionSeleccionada) {
+      Notificar("Selecciona una subárea válida", "error", "normal");
+      return;
+    }
+
+    try {
+      const res = await fetch(variables("API") + "/programacion/addCola", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({
+          idProgramacion: programacionSeleccionada.idProgramacion,
+          idArea: programacionSeleccionada.idArea,
+          idSubarea: subareaSeleccionada,
+        }),
+      });
+
+      const data = await res.json();
+      if (data.status !== "success") throw new Error(data.mensaje);
+
+      Notificar("Añadido correctamente a la cola", "success", "normal");
+
+      // Cerrar el modal y refrescar
+      document.querySelector("#modalDetalle .btn-close")?.click();
+      fetchColaProgramaciones();
+    } catch (error) {
+      Notificar(
+        "Error al añadir a la cola: " + error.message,
+        "error",
+        "normal"
+      );
+    }
   };
 
   return (
     <div className="container mt-4">
-      <h2 className="mb-4">Áreas y Programaciones</h2>
+      <h2 className="mb-4">📌 Programaciones confirmadas por área</h2>
 
       {loading && <p className="fw-bold">Cargando datos...</p>}
 
-      {resumen && (
-        <div className="alert alert-info d-flex flex-wrap justify-content-between align-items-center mb-4 shadow-sm">
-          <div>
-            <strong>Áreas registradas:</strong> {resumen.totalAreas}{" "}
-            <strong>con programación:</strong>{" "}
-            {resumen.areasConProgramacionActual}
-          </div>
-          <div>
-            <strong>Montacargas:</strong> {resumen.recurso.montacargasActuales}{" "}
-            / {resumen.recurso.totalMontacargas}{" "}
-            <i className="fas fa-truck text-primary"></i>
-          </div>
-          <div>
-            <strong>Auxiliares:</strong> {resumen.recurso.auxiliaresActuales} /{" "}
-            {resumen.recurso.totalAuxiliares}{" "}
-            <i className="fas fa-user text-info"></i>
-          </div>
-        </div>
-      )}
-
       <div className="row">
-        {areas.map((area) => {
-          const tieneProgramacion = !!area.programacionActual;
-          return (
-            <div key={area.idArea} className="col-md-3 mb-4">
-              <div
-                className={`card shadow-sm h-100 ${
-                  tieneProgramacion ? "border-success" : "border-primary"
-                }`}
-              >
-            <div
-  className={`card-header d-flex justify-content-between align-items-center ${
-    tieneProgramacion ? "bg-success" : "bg-primary"
-  } text-white`}
->
-  <div>
-    <h5 className="mb-0">{area.nombre}</h5>
-    <small>
-      Tipo: <b>{area.tipo || "No definido"}</b>
-    </small>
-  </div>
-  {tieneProgramacion && (
-    <span className="badge bg-light text-success fw-semibold">Ocupado</span>
-  )}
-</div>
-
-
-                <div className="card-body d-flex flex-column">
-                  <div>
-                    <div className="d-flex align-items-center mb-2">
-                      <span className="fw-semibold me-2">
-                        Montacargas asignados:
-                      </span>
-                      {area.montacargasAsignados > 0 ? (
-                        <>
-                          <span className="badge bg-warning text-dark fs-6 me-2">
-                            {area.montacargasAsignados}
+        {programacionesPorArea.map((area) => (
+          <div key={area.idArea} className="col-md-4 mb-4">
+            <div className="card border-success shadow-sm h-100">
+              <div className="card-header bg-success text-white text-center">
+                <h5 className="mb-0">{area.nombre}</h5>
+              </div>
+              <div className="card-body p-0">
+                <table className="table table-sm table-hover mb-0">
+                  <thead className="table-light">
+                    <tr>
+                      <th>#</th>
+                      <th>Tipo</th>
+                      <th>Conductor</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {area.programaciones.map((p, index) => (
+                      <tr
+                        key={p.idProgramacion}
+                        data-bs-toggle="modal"
+                        data-bs-target="#modalDetalle"
+                        onClick={() => abrirModal(p)}
+                        style={{ cursor: "pointer" }}
+                        className={p.estado === 2 ? "fw-bold" : ""}
+                      >
+                        <td>{index + 1}</td>
+                        <td>
+                          <span
+                            className={
+                              p.tipo === 1
+                                ? "bg-success badge"
+                                : "bg-primary badge"
+                            }
+                          >
+                            {p.tipo === 1 ? "Despacho" : "Recepción"}
                           </span>
-                          <i className="fas fa-truck fa-lg text-warning"></i>
-                        </>
-                      ) : (
-                        <small className="fw-bold text-dark">No hay</small>
-                      )}
-                    </div>
+                        </td>
+                        <td>
+                          {`${p.conductor?.Nombre1 || ""} ${
+                            p.conductor?.Apellido1 || ""
+                          }`}
+                          <br />
+                          {p.tipo === 0 ? (
+                            <span className="text-muted small">
+                              {p.producto || "—"} - {p.cantidad || "—"}{" "}
+                            </span>
+                          ) : (
+                            <span className={`text-muted small`}>
+                              {new Date(p.fechaAsignada )
+                                            .toISOString()
+                                            .slice(0, 16)
+                                            .replace("T", " ")}
+                            </span>
+                          )}
 
-                    <div className="d-flex align-items-center">
-                      <span className="fw-semibold me-2">
-                        Auxiliares asignados:
-                      </span>
-                      {area.auxiliaresAsignados > 0 ? (
-                        <>
-                          <span className="badge bg-info text-white fs-6 me-2">
-                            {area.auxiliaresAsignados}
-                          </span>
-                          <i className="fas fa-user text-info"></i>
-                        </>
-                      ) : (
-                        <small className="fw-bold text-dark">No hay</small>
-                      )}
-                    </div>
-                    <p></p>
-                  </div>
-
-                  <button
-                    className={`btn ${
-                      collapseOpen[area.idArea]
-                        ? tieneProgramacion
-                          ? "btn-outline-success"
-                          : "btn-outline-primary"
-                        : tieneProgramacion
-                        ? "btn-success"
-                        : "btn-primary"
-                    } mt-auto`}
-                    onClick={() => toggleCollapse(area.idArea)}
-                    aria-expanded={collapseOpen[area.idArea] || false}
-                  >
-                    {collapseOpen[area.idArea]
-                      ? "Ocultar Programación"
-                      : "Ver Programación"}
-                    <i
-                      className={`ms-2 fas fa-chevron-${
-                        collapseOpen[area.idArea] ? "up" : "down"
-                      }`}
-                    ></i>
-                  </button>
-
-                  {collapseOpen[area.idArea] && (
-                    <div
-                      className="mt-3"
-                      style={{ maxHeight: "350px", overflowY: "auto" }}
-                    >
-                      {tieneProgramacion ? (
-                        <div className="border rounded p-3 bg-light">
-                          <div>
-                            <strong>ID:</strong>{" "}
-                            {area.programacionActual.numeroDelDia}
-                          </div>
-                          <div>
-                            <strong>Producto:</strong>{" "}
-                            {area.programacionActual.producto}
-                          </div>
-                          <div>
-                            <strong>Cantidad:</strong>{" "}
-                            {area.programacionActual.cantidad}
-                          </div>
-                          <div>
-                            <strong>Conductor:</strong>{" "}
-                            {area.programacionActual.conductor ? (
-                              <>
-                                <i className="fas fa-user text-secondary me-1"></i>
-                                {`${
-                                  area.programacionActual.conductor.Nombre1 ||
-                                  ""
-                                } ${
-                                  area.programacionActual.conductor.Apellido1 ||
-                                  ""
-                                } (${area.programacionActual.conductor.phone})`}
-                              </>
-                            ) : (
-                              "Sin conductor"
-                            )}
-                          </div>
-                          <div>
-                            <strong>Confirmador:</strong>{" "}
-                            {area.programacionActual.confirmador ? (
-                              <>
-                                <i className="fas fa-user-check text-success me-1"></i>
-                                {`${area.programacionActual.confirmador.user} (${area.programacionActual.confirmador.documento})`}
-                              </>
-                            ) : (
-                              "Sin confirmador"
-                            )}
-                          </div>
-                          <div>
-                            <strong>Dirección:</strong>{" "}
-                            {area.programacionActual.contacto || ""}
-                          </div>
-                          <div>
-                            <strong>Observación:</strong>{" "}
-                            {area.programacionActual.observaciones || ""}
-                          </div>
-                        </div>
-                      ) : (
-                        <p className="text-muted">
-                          No hay programación para esta área.
-                        </p>
-                      )}
-                    </div>
-                  )}
-                </div>
+                          {p.estado === 2 && (
+                            <>
+                              <span className="badge bg-danger">Retrasado</span>
+                            </>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
-          );
-        })}
+          </div>
+        ))}
+      </div>
+
+      {/* Modal fijo sin animaciones */}
+      <div
+        className="modal fade"
+        id="modalDetalle"
+        tabIndex="-1"
+        aria-hidden="true"
+        data-bs-backdrop="static"
+      >
+        <div className="modal-dialog modal-lg modal-dialog-scrollable">
+          <div className="modal-content">
+            <div className="modal-header bg-primary text-white">
+              <h5 className="modal-title">📋 Detalles de la programación</h5>
+              <button
+                type="button"
+                className="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Cerrar"
+              ></button>
+            </div>
+            <div className="modal-body">
+              {programacionSeleccionada ? (
+                <>
+                  <div className="row">
+                    <div className="col-md-6">
+                      <p>
+                        <strong>Tipo:</strong>{" "}
+                        {programacionSeleccionada.tipo === 1
+                          ? "Despacho"
+                          : "Recepción"}
+                      </p>
+                      <p>
+                        <strong>Producto:</strong>{" "}
+                        {programacionSeleccionada.producto || "—"}
+                      </p>
+                      <p>
+                        <strong>Cantidad:</strong>{" "}
+                        {programacionSeleccionada.cantidad || "—"}
+                      </p>
+                      <p>
+                        <strong>Contacto:</strong>{" "}
+                        {programacionSeleccionada.contacto || "—"}
+                      </p>
+                    </div>
+                    <div className="col-md-6">
+                      <p>
+                        <strong>Conductor:</strong>{" "}
+                        {`${
+                          programacionSeleccionada.conductor?.Nombre1 || ""
+                        } ${
+                          programacionSeleccionada.conductor?.Apellido1 || ""
+                        } (${programacionSeleccionada.conductor?.phone || ""})`}
+                      </p>
+                      <p>
+                        <strong>Confirmador:</strong>{" "}
+                        {`${
+                          programacionSeleccionada.confirmador?.user || "—"
+                        } (${
+                          programacionSeleccionada.confirmador?.documento || ""
+                        })`}
+                      </p>
+                      <p>
+                        <strong>Fecha asignada:</strong>{" "}
+                        {new Date(
+                          programacionSeleccionada.fechaAsignada
+                           )
+                                            .toISOString()
+                                            .slice(0, 16)
+                                            .replace("T", " ")
+                      }
+                      </p>
+                      <p>
+                        <strong>Observaciones:</strong>{" "}
+                        {programacionSeleccionada.observaciones || "—"}
+                      </p>
+                    </div>
+                  </div>
+
+                  <hr />
+                  <div className="row">
+                    <div className="col-md-8 mb-3">
+                      <label className="form-label fw-bold">Subárea</label>
+                      <select
+                        className="form-select"
+                        value={subareaSeleccionada || ""}
+                        onChange={(e) =>
+                          setSubareaSeleccionada(Number(e.target.value))
+                        }
+                      >
+                        <option value="">Selecciona una subárea</option>
+                        {subareas.map((s) => (
+                          <option key={s.idSubarea} value={s.idSubarea}>
+                            {s.nombre}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="col-md-4 mb-3 d-flex align-items-end">
+                      <button
+                        className="btn btn-success w-100"
+                        onClick={añadirACola}
+                      >
+                        Añadir a cola
+                      </button>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <p>No hay programación seleccionada</p>
+              )}
+            </div>
+            <div className="modal-footer">
+              <button
+                type="button"
+                className="btn btn-secondary"
+                data-bs-dismiss="modal"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
 };
 
-export default Asignaciones;
+export default ColaProgramaciones;
