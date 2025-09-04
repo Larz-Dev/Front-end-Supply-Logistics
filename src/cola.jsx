@@ -305,18 +305,18 @@ const TurnosAsignados = () => {
 
                                 <div className="collapse mt-2" id={collapseId}>
                                   <div className="card card-body p-2">
-                                    {tipoProg !== 1 && prog?.producto && (
+                                   
                                       <div>
-                                        <strong>Producto:</strong>{" "}
-                                        {prog.producto}
+                                        <strong>Servicio:</strong>{" "}
+                                        {prog?.servicio?.nombre}
                                       </div>
-                                    )}
-                                    {tipoProg !== 1 && prog?.cantidad && (
+                                  
+                                   
                                       <div>
-                                        <strong>Cantidad:</strong>{" "}
-                                        {prog.cantidad}
+                                        <strong>Valor:</strong>{" "}
+                                        {prog?.servicio?.valor?.toLocaleString("es-CO") + " $" }
                                       </div>
-                                    )}
+                               
                                     {prog?.fechaAsignada && (
                                       <div>
                                         <strong>Fecha asignada:</strong>{" "}
@@ -399,16 +399,16 @@ const TurnosAsignados = () => {
                       <b>Conductor:</b> {modalFinalizar.conductor?.Nombre1}{" "}
                       {modalFinalizar.conductor?.Apellido1}
                     </li>
-                    {modalTipo != 0 && (
+                  
                       <div>
                         <li className="list-group-item">
-                          <b>Producto:</b> {modalFinalizar.producto || "N/A"}
+                          <b>Servicio:</b> {modalFinalizar?.servicio?.nombre || "N/A"}
                         </li>
                         <li className="list-group-item">
-                          <b>Cantidad:</b> {modalFinalizar.cantidad || "N/A"}
+                          <b>Cantidad:</b> {modalFinalizar?.servicio?.valor?.toLocaleString("es-CO") + " $"  || "N/A"}
                         </li>
                       </div>
-                    )}
+                    
                     <li className="list-group-item">
                       <b>Fecha asignada:</b>{" "}
                       {formatearFecha(modalFinalizar.fechaAsignada)}
@@ -515,14 +515,15 @@ const TurnosAsignados = () => {
                   <ul className="list-group mb-3">
                     {programacionSeleccionada.tipo === 0 && (
                       <>
+                      <div>
                         <li className="list-group-item">
-                          <b>Producto:</b>{" "}
-                          {programacionSeleccionada.producto || "N/A"}
+                          <b>Servicio:</b> {programacionSeleccionada?.servicio?.nombre || "N/A"}
                         </li>
                         <li className="list-group-item">
-                          <b>Cantidad:</b>{" "}
-                          {programacionSeleccionada.cantidad || "N/A"}
+                          <b>Cantidad:</b> {programacionSeleccionada?.servicio?.valor?.toLocaleString("es-CO") + " $"  || "N/A"}
                         </li>
+                      </div>
+                    
                       </>
                     )}
                     <li className="list-group-item">

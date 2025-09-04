@@ -3,7 +3,7 @@ import { Cerrarsesion, variables, Validarsesion } from "./funciones";
 import loadingProfile from "./assets/images/ProfileLoading.gif";
 
 const Cabecera = () => {
-//  const [profileImage, setProfileImage] = useState(null);
+  //  const [profileImage, setProfileImage] = useState(null);
   const [timer, setTimer] = useState(""); // State for the timer
   let tipo = "";
   Validarsesion();
@@ -15,8 +15,8 @@ const Cabecera = () => {
     } else {
       tipo = "conductor";
     }
-  
-/*  fetch(variables("API") + "/" + tipo + "/profile", {
+
+    /*  fetch(variables("API") + "/" + tipo + "/profile", {
       method: "Post",
       headers: {
         "Content-Type": "application/json",
@@ -33,8 +33,6 @@ const Cabecera = () => {
         setProfileImage(null);
         console.error("Error fetching profile image:", error);
       });*/
-
-
 
     // Calculate the logout time
     const logoutTime = sessionStorage.getItem("logoutTime");
@@ -141,19 +139,27 @@ const Cabecera = () => {
 
                   <small className=" opacity-50 m-2 ">{timer}</small>
                 </button>
-                <ul className="dropdown-menu  ">
+                <ul className="dropdown-menu ">
                   <li className="text-center"> </li>
                   <li className="text-center m-2">
-                    <p className="fw-light ">
-                      {sessionStorage.getItem("documento")}
+                     <p className="fw-light justificar">
+                          Correo: {sessionStorage.getItem("email")}
+                        </p>
+                              <p className="fw-light justificar">
+                      Documento: {sessionStorage.getItem("documento")}
                     </p>
-                    <p className="fw-light">
-                      {sessionStorage.getItem("email")}
-                    </p>
+               
+                    {sessionStorage.getItem("rol") == 3 && (
+                      <div>
+                     
 
-                    <p className="fw-light ">
-                      {sessionStorage.getItem("transportadora")}
-                    </p>
+
+                        <p className="fw-light justificar">
+                          Transportadora:{" "}
+                          {sessionStorage.getItem("transportadora")}
+                        </p>
+                      </div>
+                    )}
                   </li>
                   <li className="text-center">
                     <button

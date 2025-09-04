@@ -16,8 +16,9 @@ import {
 
 import Sidebar from "./sidebar.jsx";
 
-import CrearProgramacion from "./generarsolicitudrecepcion.jsx";
-import GenerarSolicitudDespacho from "./generarsolicituddespacho.jsx";
+//import CrearProgramacion from "./generarsolicitudrecepcion.jsx";
+import CrearSolicitud from "./generaarsolicitud.jsx";
+//import GenerarSolicitudDespacho from "./generarsolicituddespacho.jsx";
 function App() {
   Validarsesion();
   document.body.style = "background: #dee2e6;";
@@ -206,7 +207,7 @@ function App() {
           (p.vehiculo?.placa?.toLowerCase() || "").includes(
             searchTerm.toLowerCase()
           ) ||
-          (p.producto?.toLowerCase() || "").includes(
+          (p.servicio?.nombre?.toLowerCase() || "").includes(
             searchTerm.toLowerCase()
           )) &&
         (estadoProgramacion === 5 || p.estado === estadoProgramacion)
@@ -283,9 +284,10 @@ function App() {
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
+                {/*     <CrearProgramacion onCreated={() => fetchProgramaciones()} />
+                   <GenerarSolicitudDespacho onCreated={() => fetchProgramaciones()} />  */}
 
-                <CrearProgramacion onCreated={() => fetchProgramaciones()} />
-                   <GenerarSolicitudDespacho onCreated={() => fetchProgramaciones()} />
+                <CrearSolicitud onCreated={() => fetchProgramaciones()} />
                 <button
                   className="btn btn-warning col-md-2 mx-1 "
                   onClick={() => {
@@ -373,8 +375,8 @@ function App() {
                               <th>Área</th>
                               <th>Tipo</th> {/* Nueva columna */}
                               <th>Vehículo</th>
-                              <th>Producto</th>
-                              <th>Cantidad</th>
+                              <th>Servicio</th>
+                              <th>Valor</th>
                               <th>Fecha/Hora</th>
                               <th>Estado</th>
                               <th>Acción</th>
@@ -397,9 +399,13 @@ function App() {
                                         >
                                           <td>{programacion.numeroDelDia}</td>
                                           <td>
-                                    {programacion?.area?.nombre ||
-                                      "No asignado"} ({( programacion?.subareaNombre||"Sin espacio asignado")})
-                                  </td>
+                                            {programacion?.area?.nombre ||
+                                              "No asignado"}{" "}
+                                            (
+                                            {programacion?.subareaNombre ||
+                                              "Sin espacio asignado"}
+                                            )
+                                          </td>
                                           <td>
                                             <span
                                               className={`badge fs-6 ${
@@ -421,13 +427,24 @@ function App() {
                                             {programacion.vehiculo.placa} (
                                             {programacion.vehiculo.tipo})
                                           </td>
-                                          <td>{programacion.producto}</td>
-                                          <td>{programacion.cantidad}</td>
+                                          <td>{programacion?.servicio?.nombre}</td>
+                                          <td>{programacion?.servicio?.valor?.toLocaleString("es-CO")} $</td>
                                           <td>
+                                             <span
+                                      className={`badge fs-6 font-monospace bg-success mb-1
+                                      `}
+                                    >
+                                      Salida:{" "}
+                                      {new Date(programacion.fechaSalida)
+                                        .toISOString()
+                                        .slice(0, 16)
+                                        .replace("T", " ")}
+                                    </span>
+
                                             <span
                                               className={`badge fs-6 font-monospace ${
                                                 programacion.fechaAsignada
-                                                  ? "bg-success"
+                                                  ? "bg-primary"
                                                   : "bg-warning text-dark"
                                               }`}
                                             >
@@ -447,12 +464,17 @@ function App() {
                                             </span>
                                           </td>
                                           <td>
-                                                <div className={` fs-6 rounded-3 fw-bold  ${getEstadoClase(programacion.estado)}`}>
-                                                                                 <span>
-                                                                                
-                                                                                   {getEstadoTexto(programacion.estado)}
-                                                                                 </span>
-                                                                               </div>
+                                            <div
+                                              className={` fs-6 rounded-3 fw-bold  ${getEstadoClase(
+                                                programacion.estado
+                                              )}`}
+                                            >
+                                              <span>
+                                                {getEstadoTexto(
+                                                  programacion.estado
+                                                )}
+                                              </span>
+                                            </div>
                                           </td>
                                           <td className="text-center">
                                             <button className="btn btn-sm btn-light">
@@ -752,7 +774,7 @@ function App() {
                 {" "}
                 <span className=" text-mute fs-6">
                   (Esta será notificada a administradores)
-                </span  >
+                </span>
               </p>
             </div>
 
@@ -776,9 +798,9 @@ function App() {
                     <div className="card-body">
                       {selectedprogramm?.tipo == 0 && (
                         <h2 className="card-title text-secondary">
-                          {selectedprogramm.producto} -{" "}
+                          {selectedprogramm?.servicio?.nombre} -{" "}
                           <span className="text-muted">
-                            {selectedprogramm.cantidad}
+                            {selectedprogramm?.servicio?.valor?.toLocaleString("es-CO")} $
                           </span>
                         </h2>
                       )}
@@ -1060,9 +1082,9 @@ function App() {
                     <div className="card-body">
                       {selectedprogramm.tipo == 0 && (
                         <h2 className="card-title text-secondary">
-                          {selectedprogramm.producto} -{" "}
+                          {selectedprogramm?.servicio?.nombre} -{" "}
                           <span className="text-muted">
-                            {selectedprogramm.cantidad}
+                            {selectedprogramm?.servicio?.valor?.toLocaleString("es-CO")} $
                           </span>
                         </h2>
                       )}

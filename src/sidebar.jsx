@@ -132,10 +132,10 @@ const Sidebar = () => {
               Transportadoras <i className="fa-regular fa-paper-plane"></i>
             </a>
             <a
-              href="/database?base=Empleados"
+              href="/database?base=Servicios"
               className="mb-2 border hover-b rounded-3 py-2"
             >
-              Empleados <i className="fa-solid fa-briefcase"></i>
+              Servicios <i className="fa-solid fa-briefcase"></i>
             </a>
             <a
               href="/database?base=Usuarios"

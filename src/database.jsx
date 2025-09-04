@@ -5,14 +5,14 @@ import Sidebar from "./sidebar.jsx";
 import Transportadora from "./transportadora.jsx";
 import Servicios from "./servicios.jsx";
 import Vehiculos from "./vehiculos.jsx";
-import Empleados from "./empleados.jsx";
+
 import Usuarios from "./usuarios.jsx";
 import Recursos from "./recursos.jsx";
 import Asignaciones from "./asignaciones.jsx";
 import Conductores from "./conductores.jsx";
 import Nomina from "./nomina.jsx";
 import Myvehiculos from "./vehiculosconductor.jsx";
-  import { useIsMobile } from "./useIsMobile.jsx"; // ajusta el path
+import { useIsMobile } from "./useIsMobile.jsx"; // ajusta el path
 import ColaProgramaciones from "./cola.jsx";
 
 function Database() {
@@ -28,19 +28,17 @@ function Database() {
   return (
     <>
       <div className="row w-100 m-0 p-0 ">
-    
         {sidebarVisible && (
           <div
-             className={`d-flex flex-column bg-light align-items-center  ${
-        isMobile
-          ? " top-0 start-0 w-100 h-100"
-          : "position-fixed top-0 start-0 col-md-3 h-100"
-      }`}
+            className={`d-flex flex-column bg-light align-items-center  ${
+              isMobile
+                ? " top-0 start-0 w-100 h-100"
+                : "position-fixed top-0 start-0 col-md-3 h-100"
+            }`}
             style={{ zIndex: 1050 }}
           >
             <Sidebar />
-                 <Cabecera />
-
+            <Cabecera />
           </div>
         )}
 
@@ -67,22 +65,27 @@ function Database() {
           {base === "Transportadora" && <Transportadora />}
           {base === "Vehiculos" && <Vehiculos />}
           {base === "Servicios" && <Servicios />}
-          {base === "Empleados" && <Empleados />}
-              {base === "Recursos" && <Recursos />}
-          {base === "Usuarios" && <Usuarios />}      
+         
+          {base === "Recursos" && <Recursos />}
+          {base === "Usuarios" && <Usuarios />}
           {base === "Asignaciones" && <Asignaciones />}
-               {base === "Cola" && <ColaProgramaciones />}
+          {base === "Cola" && <ColaProgramaciones />}
           {base === "Nomina" && <Nomina />}
           {base === "Conductores" && <Conductores />}
           {base === "Misvehiculos" && <Myvehiculos />}
           {!base && (
             <div>
               <h1>Selecciona una base de datos</h1>
-              <Link to="/database?base=Transportadora">Transportadora</Link><br/>
-              <Link to="/database?base=Vehiculos">Vehículos</Link><br/>
-              <Link to="/database?base=Servicios">Servicios</Link><br/>
-              <Link to="/database?base=Usuarios">Usuarios</Link><br/>
-              <Link to="/database?base=Nomina">Nómina</Link><br/>
+              <Link to="/database?base=Transportadora">Transportadora</Link>
+              <br />
+              <Link to="/database?base=Vehiculos">Vehículos</Link>
+              <br />
+              <Link to="/database?base=Servicios">Servicios</Link>
+              <br />
+              <Link to="/database?base=Usuarios">Usuarios</Link>
+              <br />
+              <Link to="/database?base=Nomina">Nómina</Link>
+              <br />
               <Link to="/database?base=Misvehiculos">Mis vehículos</Link>
             </div>
           )}

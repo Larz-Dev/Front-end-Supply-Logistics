@@ -26,7 +26,7 @@ const Login = () => {
       if (data.status === "success") {
         sessionStorage.setItem("user", data.user);
         sessionStorage.setItem("email", data.email);
-        sessionStorage.setItem("documentoo", data.documentoo);
+        sessionStorage.setItem("documento", data.documento);
         sessionStorage.setItem("rol", data.rol);
         sessionStorage.setItem("idUsuario", data.idUsuario);
         sessionStorage.setItem("token", data.token);
@@ -61,10 +61,8 @@ const Login = () => {
         sessionStorage.setItem("Nombre1", data.conductor.Nombre1);
         sessionStorage.setItem("Nombre2", data.conductor.Nombre2);
         sessionStorage.setItem("phone", data.conductor.phone);
-        sessionStorage.setItem("pinTemporal", data.pin);
 
-        // Store additional variables
-        console.log(data);
+
         sessionStorage.setItem("documento", data.conductor.documento);
         sessionStorage.setItem("estado", data.conductor.estado);
         sessionStorage.setItem("idConductor", data.conductor.idConductor);

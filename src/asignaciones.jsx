@@ -150,7 +150,7 @@ const ColaProgramaciones = () => {
                           <br />
                           {p.tipo === 0 ? (
                             <span className="text-muted small">
-                              {p.producto || "—"} - {p.cantidad || "—"}{" "}
+                              {p?.servicio?.nombre || "—"} - {p?.servicio?.valor?.toLocaleString("es-CO") + " $"  || "—"}{" "}
                             </span>
                           ) : (
                             <span className={`text-muted small`}>
@@ -208,12 +208,12 @@ const ColaProgramaciones = () => {
                           : "Recepción"}
                       </p>
                       <p>
-                        <strong>Producto:</strong>{" "}
-                        {programacionSeleccionada.producto || "—"}
+                        <strong>Servicio:</strong>{" "}
+                        {programacionSeleccionada?.servicio?.nombre || "—"}
                       </p>
                       <p>
-                        <strong>Cantidad:</strong>{" "}
-                        {programacionSeleccionada.cantidad || "—"}
+                        <strong>Valor:</strong>{" "}
+                        {programacionSeleccionada?.servicio?.valor?.toLocaleString("es-CO") + " $"  || "—"}
                       </p>
                       <p>
                         <strong>Contacto:</strong>{" "}
